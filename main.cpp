@@ -1,5 +1,5 @@
-#include "renderer.h"
-#include "mesh.h"
+#include "renderer.hpp"
+#include "mesh.hpp"
 
 SDL_Window* window = nullptr;
 SDL_Renderer* renderer = nullptr;

@@ -1,4 +1,4 @@
-#include "mesh.h"
+#include "mesh.hpp"
 
 Mesh Mesh::readObj(string filepath) {
 	ifstream file(filepath, ios::in);

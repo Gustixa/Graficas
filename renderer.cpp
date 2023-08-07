@@ -1,4 +1,4 @@
-#include "renderer.h"
+#include "renderer.hpp"
 
 void renderPoint(SDL_Renderer* renderer, const glm::ivec2& point) {
 	SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
