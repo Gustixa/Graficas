@@ -1,6 +1,6 @@
 # Graficas
 
-![image](https://github.com/Gustixa/Graficas/assets/87200735/bba066ad-7458-4d39-bdb4-9fc68576a505)
+![image](https://github.com/Gustixa/Graficas/assets/87200735/4aa08203-cf89-4125-a531-dc641a0dac7a)
 
 glm  0.9.9
 
