@@ -26,6 +26,9 @@ void render(Scene scene) {
 
 	SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 
+	float scale = 0.25;
+	float visualTranslateX = int(0);
+	float visualTranslateY = int(0);
 
 	for (const Mesh& mesh : scene.objects) {
 		for (const Triangle& triangle : mesh.faces) {
@@ -35,21 +38,16 @@ void render(Scene scene) {
 
 			double Aspect_Ratio = double(scene.RESX) / double(scene.RESY);
 
-			int x1 = static_cast<int>((v1.x + 1.0f) * 0.5f * scene.RESX);
-			int y1 = static_cast<int>((v1.y * Aspect_Ratio + 1.0f) * 0.5f * scene.RESY);
-			int x2 = static_cast<int>((v2.x + 1.0f) * 0.5f * scene.RESX);
-			int y2 = static_cast<int>((v2.y * Aspect_Ratio + 1.0f) * 0.5f * scene.RESY);
-			int x3 = static_cast<int>((v3.x + 1.0f) * 0.5f * scene.RESX);
-			int y3 = static_cast<int>((v3.y * Aspect_Ratio + 1.0f) * 0.5f * scene.RESY);
+			int x1 = static_cast<int>(((v1.x + visualTranslateX) * scale + 1.0f) * 0.5f * scene.RESX);
+			int y1 = static_cast<int>(((v1.y + visualTranslateY) * scale * Aspect_Ratio + 1.0f) * 0.5f * scene.RESY);
+			int x2 = static_cast<int>(((v2.x + visualTranslateX) * scale + 1.0f) * 0.5f * scene.RESX);
+			int y2 = static_cast<int>(((v2.y + visualTranslateY) * scale * Aspect_Ratio + 1.0f) * 0.5f * scene.RESY);
+			int x3 = static_cast<int>(((v3.x + visualTranslateX) * scale + 1.0f) * 0.5f * scene.RESX);
+			int y3 = static_cast<int>(((v3.y + visualTranslateY) * scale * Aspect_Ratio + 1.0f) * 0.5f * scene.RESY);
 
-			if (x1 < scene.RESX && x1 >= 0 && x2 < scene.RESX && x2 >= 0 && y1 < scene.RESY && y1 >= 0 && y2 < scene.RESY && y2 >= 0)
-				renderLine(renderer, glm::vec2(x1, y1), glm::vec2(x2, y2));
-
-			if (x3 < scene.RESX && x3 >= 0 && x2 < scene.RESX && x2 >= 0 && y3 < scene.RESY && y3 >= 0 && y2 < scene.RESY && y2 >= 0)
-				renderLine(renderer, glm::vec2(x2, y2), glm::vec2(x3, y3));
-
-			if (x1 < scene.RESX && x1 >= 0 && x3 < scene.RESX && x3 >= 0 && y1 < scene.RESY && y1 >= 0 && y3 < scene.RESY && y3 >= 0)
-				renderLine(renderer, glm::vec2(x3, y3), glm::vec2(x1, y1));
+			renderLine(renderer, scene.RESX, scene.RESY, glm::vec2(x1, y1), glm::vec2(x2, y2));
+			renderLine(renderer, scene.RESX, scene.RESY, glm::vec2(x2, y2), glm::vec2(x3, y3));
+			renderLine(renderer, scene.RESX, scene.RESY, glm::vec2(x3, y3), glm::vec2(x1, y1));
 		}
 	}
 
