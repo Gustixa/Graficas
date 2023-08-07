@@ -7,7 +7,7 @@ void renderPoint(SDL_Renderer* renderer, const glm::ivec2& point) {
 
 void renderLine(SDL_Renderer* renderer, const glm::vec2& pointA, const glm::vec2& pointB) {
 	int dx = abs(pointB.x - pointA.x);
-	int dy = abs(pointB.x - pointA.y);
+	int dy = abs(pointB.y - pointA.y);
 	int err = dx - dy;
 	int x = pointA.x;
 	int y = pointA.y;

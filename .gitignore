@@ -33,3 +33,5 @@
 .vs/
 glm/
 SDL2-2.28.2/
+x64/
+enc_temp_folder/

@@ -21,14 +21,18 @@ void init(const uint16_t RESX, const uint16_t RESY) {
 }
 
 void render(Scene scene) {
-	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255); // Set background color to black
+	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 	SDL_RenderClear(renderer);
 
 	SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 
 
 	for (const Mesh& mesh : scene.objects) {
+		cout << "Rendering Object: " << endl;
+		int i = 0;
 		for (const Triangle& triangle : mesh.faces) {
+			cout << double(i) / double(mesh.faces.size()) * 100.0 << endl;
+			i++;
 			glm::vec3 v1 = mesh.vertices[triangle.i1];
 			glm::vec3 v2 = mesh.vertices[triangle.i2];
 			glm::vec3 v3 = mesh.vertices[triangle.i3];
@@ -64,8 +68,7 @@ int main(int argc, char* argv[]) {
 	bool running = true;
 	
 	Scene scene = Scene(RESX, RESY);
-	scene.objects.push_back(Mesh::readObj("./skull.obj"));
-
+	scene.objects.push_back(Mesh::readObj("./nave.obj"));
 
 	while (running) {
 		SDL_Event event;
@@ -76,10 +79,6 @@ int main(int argc, char* argv[]) {
 		}
 		render(scene);
 	}
-
-	SDL_DestroyRenderer(renderer);
-	SDL_DestroyWindow(window);
-	SDL_Quit();
 
 	return 0;
 }
