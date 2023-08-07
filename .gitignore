@@ -30,3 +30,6 @@
 *.exe
 *.out
 *.app
+.vs/
+glm/
+SDL2-2.28.2/
