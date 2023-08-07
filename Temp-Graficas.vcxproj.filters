@@ -32,10 +32,10 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="renderer.h">
+    <ClInclude Include="renderer.hpp">
       <Filter>Header Files\renderer</Filter>
     </ClInclude>
-    <ClInclude Include="mesh.h">
+    <ClInclude Include="mesh.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

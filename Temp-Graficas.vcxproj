@@ -138,8 +138,8 @@
     <ClCompile Include="renderer.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="mesh.h" />
-    <ClInclude Include="renderer.h" />
+    <ClInclude Include="mesh.hpp" />
+    <ClInclude Include="renderer.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
