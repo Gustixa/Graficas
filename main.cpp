@@ -28,11 +28,7 @@ void render(Scene scene) {
 
 
 	for (const Mesh& mesh : scene.objects) {
-		cout << "Rendering Object: " << endl;
-		int i = 0;
 		for (const Triangle& triangle : mesh.faces) {
-			cout << double(i) / double(mesh.faces.size()) * 100.0 << endl;
-			i++;
 			glm::vec3 v1 = mesh.vertices[triangle.i1];
 			glm::vec3 v2 = mesh.vertices[triangle.i2];
 			glm::vec3 v3 = mesh.vertices[triangle.i3];
