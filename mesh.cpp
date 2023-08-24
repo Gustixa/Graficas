@@ -1,5 +1,19 @@
 #include "mesh.hpp"
 
+Mesh::Mesh(){
+	rot = vec3(0.0f);
+	pos = vec3(0.0f);
+	scale = vec3(5.0f);
+
+	vertices = vector<glm::vec3>();
+	vertex_normals = vector<vec3>();
+	vertex_uvs = vector<vec2>();
+	faces = vector<Triangle>();
+
+	model_matrix = mat4x4();
+	vertex_output = vector<Vertex>();
+}
+
 void Mesh::processMatrix() {
 	const mat4x4 translation = mat4x4(
 		1, 0, 0, pos.x ,

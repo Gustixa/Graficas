@@ -68,6 +68,8 @@ public:
 	mat4x4 model_matrix;
 	vector<Vertex> vertex_output;
 
+	Mesh();
+
 	void processMatrix();
 	void processVertices(const mat4x4& cam_mat, const mat4x4& proj_mat, const mat4x4& view_mat);
 

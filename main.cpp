@@ -34,6 +34,44 @@ void render(Scene scene) {
 
 	SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 
+	scene.cam.processMatrix(scene.RESX, scene.RESY);
+
+	//for (Mesh& mesh : scene.objects) {
+	//	mesh.processMatrix();
+	//	mesh.processVertices(scene.cam.camera_matrix, scene.cam.projection_matrix, scene.cam.viewport_matrix);
+	//	for (const Triangle& tri : mesh.faces) {
+	//		const Vertex& v1 = mesh.vertex_output[tri.i1];
+	//		const Vertex& v2 = mesh.vertex_output[tri.i2];
+	//		const Vertex& v3 = mesh.vertex_output[tri.i3];
+	//		const int minX = min({ v1.Pos.x, v2.Pos.x, v3.Pos.x });
+	//		const int maxX = max({ v1.Pos.x, v2.Pos.x, v3.Pos.x }) + 1;
+	//		const int minY = min({ v1.Pos.y, v2.Pos.y, v3.Pos.y });
+	//		const int maxY = max({ v1.Pos.y, v2.Pos.y, v3.Pos.y }) + 1;
+	//		for (int x = minX; x < maxX; x++) {
+	//			for (int y = minY; y < maxY; y++) {
+	//				if (x >= 0 && x < scene.RESX && y >= 0 && y < scene.RESY) {
+	//					
+	//					const float AreaPBC = (v2.Pos.y - v3.Pos.y) * (x - v3.Pos.x) + (v3.Pos.x - v2.Pos.x) * (y - v3.Pos.y);
+	//					const float AreaACP = (v3.Pos.y - v1.Pos.y) * (x - v3.Pos.x) + (v1.Pos.x - v3.Pos.x) * (y - v3.Pos.y);
+	//					const float AreaABC = (v2.Pos.y - v3.Pos.y) * (v1.Pos.x - v3.Pos.x) + (v3.Pos.x - v2.Pos.x) * (v1.Pos.y - v3.Pos.y);
+
+	//					const float u = AreaPBC / AreaABC;
+	//					const float v = AreaACP / AreaABC;
+	//					const float w = 1.0 - u - v;
+
+	//					if (u >= 0.0 && u <= 1.0 && v >= 0.0 && v <= 1.0 && w >= 0.0 && w <= 1.0) {
+	//						const float Depth = u * v1.Pos.z + v * v2.Pos.z + w * v3.Pos.z;
+	//						if (Depth < scene.Zbuffer[x][y]) {
+	//							scene.Zbuffer[x][y] = Depth;
+	//							renderPoint(renderer, scene.RESX, scene.RESY, vec2(x, y), v1.Color * u + v2.Color * v + v3.Color * w);
+	//						}
+	//					}
+	//				}
+	//			}
+	//		}
+	//	}
+	//}
+	
 	float scale = 0.25;
 	float visualTranslateX = int(0);
 	float visualTranslateY = int(0);
@@ -56,6 +94,7 @@ void render(Scene scene) {
 			renderTri(renderer, scene.RESX, scene.RESY, scene.Zbuffer, glm::vec3(x1, y1, v1.z), glm::vec3(x2, y2, v2.z), glm::vec3(x3, y3, v3.z));
 		}
 	}
+	cout << "Rendered";
 
 	SDL_RenderPresent(renderer);
 }
