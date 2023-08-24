@@ -1,5 +1,7 @@
 #include "renderer.hpp"
 #include "mesh.hpp"
+#include "camera.hpp"
+
 
 SDL_Window* window = nullptr;
 SDL_Renderer* renderer = nullptr;
@@ -8,10 +10,16 @@ class Scene {
 public:
 	uint16_t RESX, RESY;
 	vector<Mesh> objects;
+	glm::vec3 sun;
+	camera cam;
 	Scene(uint16_t resx, uint16_t resy) {
 		RESX = resx;
 		RESY = resy;
+		Zbuffer = vector<vector<float>>(RESX, vector<float>(RESY, 10000.0f));
+		sun = glm::vec3(1,0,0);
+		cam = camera();
 	}
+	vector<vector<float>> Zbuffer;
 };
 
 void init(const uint16_t RESX, const uint16_t RESY) {
@@ -45,9 +53,7 @@ void render(Scene scene) {
 			int x3 = static_cast<int>(((v3.x + visualTranslateX) * scale + 1.0f) * 0.5f * scene.RESX);
 			int y3 = static_cast<int>(((v3.y + visualTranslateY) * scale * Aspect_Ratio + 1.0f) * 0.5f * scene.RESY);
 
-			renderLine(renderer, scene.RESX, scene.RESY, glm::vec2(x1, y1), glm::vec2(x2, y2));
-			renderLine(renderer, scene.RESX, scene.RESY, glm::vec2(x2, y2), glm::vec2(x3, y3));
-			renderLine(renderer, scene.RESX, scene.RESY, glm::vec2(x3, y3), glm::vec2(x1, y1));
+			renderTri(renderer, scene.RESX, scene.RESY, scene.Zbuffer, glm::vec3(x1, y1, v1.z), glm::vec3(x2, y2, v2.z), glm::vec3(x3, y3, v3.z));
 		}
 	}
 
@@ -62,7 +68,7 @@ int main(int argc, char* argv[]) {
 	bool running = true;
 	
 	Scene scene = Scene(RESX, RESY);
-	scene.objects.push_back(Mesh::readObj("./nave.obj"));
+	scene.objects.push_back(Mesh::readObj("./Logo.obj"));
 
 	while (running) {
 		SDL_Event event;
