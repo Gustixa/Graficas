@@ -48,10 +48,17 @@ struct Triangle {
 };
 
 struct Vertex {
-	vec3 Pos;
-	vec3 Color;
-	vec3 Normal;
-	vec2 UV;
+	vec3 pos;
+	vec3 col;
+	vec3 normal;
+	vec2 texcoord;
+
+	Vertex() {
+		pos = vec3(0);
+		col = vec3(1);
+		normal = vec3(1);
+		texcoord = vec2(0);
+	}
 };
 
 class Mesh;
@@ -61,6 +68,7 @@ public:
 	vec3 rot, pos, scale;
 
 	vector<glm::vec3> vertices;
+	vector<vec3> vertex_colors;
 	vector<vec3> vertex_normals;
 	vector<vec2> vertex_uvs;
 	vector<Triangle> faces;
@@ -75,3 +83,15 @@ public:
 
 	static Mesh readObj(string filepath);
 };
+
+inline mat4x4 mulmat4(mat4x4 a, mat4x4 b) {
+	mat4x4 Result = mat4x4();
+	for (int i = 0; i < 4; ++i) {
+		for (int j = 0; j < 4; ++j) {
+			for (int k = 0; k < 4; ++k) {
+				Result[i][j] += a[i][k] * b[k][j];
+			}
+		}
+	}
+	return Result;
+}
