@@ -1,6 +1,6 @@
 #include "renderer.hpp"
 
-void renderPoint(SDL_Renderer* renderer, const uint16_t resx, const uint16_t resy, const ivec2& point, const ivec3& color) {
+void renderPoint(SDL_Renderer* renderer, const uint16_t resx, const uint16_t resy, const ivec2& point, const vec3& color) {
 
 	if (point.x < resx && point.x >= 0 && point.y < resy && point.y >= 0) {
 		SDL_SetRenderDrawColor(renderer, int(color.x * 255.0f), int(color.y * 255.0f), int(color.z * 255.0f), 255);

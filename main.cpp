@@ -16,7 +16,7 @@ public:
 		RESX = resx;
 		RESY = resy;
 		Zbuffer = vector<vector<float>>(RESX, vector<float>(RESY, 10000.0f));
-		sun = glm::vec3(1,0,0);
+		sun = normalize(vec3(1,0.5,0));
 		cam = camera();
 	}
 	vector<vector<float>> Zbuffer;
@@ -70,15 +70,21 @@ void render(Scene scene) {
 
 						if (u >= 0.0f && u <= 1.0f && v >= 0.0f && v <= 1.0f && w >= 0.0f && w <= 1.0f) {
 							const float Depth = u * v1.pos.z + v * v2.pos.z + w * v3.pos.z;
+							vec3 Color = v1.col * u + v2.col * v + v3.col * w;
+							float Sun_Intensity = dot((u * v1.normal + v * v2.normal + w * v3.normal), scene.sun);
+							if (Sun_Intensity < 0.0f) {
+								Sun_Intensity = 0.0f;
+							}
+							Color *= Sun_Intensity;
 							if (Depth < scene.Zbuffer[x][y]) {
 								scene.Zbuffer[x][y] = Depth;
-								renderPoint(renderer, scene.RESX, scene.RESY, vec2(x, y), v1.col * u + v2.col * v + v3.col * w);
+								renderPoint(renderer, scene.RESX, scene.RESY, vec2(x, y), Color);
 							}
 						}
 					}
 				}
 			}
-			//cout << "Rendered:  " << float(i) / float(mesh.faces.size()) * 100.0 << "%" << endl;
+			cout << "Rendered:  " << float(i) / float(mesh.faces.size()) * 100.0 << "%" << endl;
 			i++;
 		}
 	}
