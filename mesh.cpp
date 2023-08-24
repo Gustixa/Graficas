@@ -182,3 +182,19 @@ Mesh Mesh::readObj(string filepath) {
 	}
 	return mesh;
 }
+
+mat4x4 mulmat4(mat4x4 a, mat4x4 b) {
+	mat4x4 Result = mat4x4();
+	for (int i = 0; i < 4; ++i) {
+		for (int j = 0; j < 4; ++j) {
+			for (int k = 0; k < 4; ++k) {
+				Result[i][j] += a[i][k] * b[k][j];
+			}
+		}
+	}
+	return Result;
+}
+
+vec3 CalculateTriangleNormal(const vec3& v1, const vec3& v2, const vec3& v3) {
+	return normalize(cross(v3 - v1, v2 - v1));
+}
