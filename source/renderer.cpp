@@ -32,7 +32,7 @@ void renderLine(SDL_Renderer* renderer, const uint16_t resx, const uint16_t resy
 	}
 }
 
-void renderShaded(SDL_Renderer* renderer, Scene& scene, const Vertex& v1, const Vertex& v2, const Vertex& v3) {
+void renderShaded(SDL_Renderer* renderer, Scene& scene, const vec3& sun, const Vertex& v1, const Vertex& v2, const Vertex& v3) {
 	const int minX = std::min({ v1.pos.x, v2.pos.x, v3.pos.x });
 	const int maxX = std::max({ v1.pos.x, v2.pos.x, v3.pos.x }) + 1;
 	const int minY = std::min({ v1.pos.y, v2.pos.y, v3.pos.y });
@@ -52,7 +52,7 @@ void renderShaded(SDL_Renderer* renderer, Scene& scene, const Vertex& v1, const 
 				if (u >= 0.0f && u <= 1.0f && v >= 0.0f && v <= 1.0f && w >= 0.0f && w <= 1.0f) {
 					const float Depth = u * v1.pos.z + v * v2.pos.z + w * v3.pos.z;
 					vec3 Color = v1.col * u + v2.col * v + v3.col * w;
-					float Sun_Intensity = dot((u * v1.normal + v * v2.normal + w * v3.normal), scene.sun);
+					float Sun_Intensity = dot((u * v1.normal + v * v2.normal + w * v3.normal), sun);
 					Sun_Intensity = clamp(Sun_Intensity, 0.0f, 1.0f);
 					Color *= Sun_Intensity;
 					if (Depth < scene.Zbuffer[x][y]) {

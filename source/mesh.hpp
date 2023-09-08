@@ -1,7 +1,12 @@
 #pragma once
 
 #include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 #include <vector>
+#include <string>
+#include <map>
 #include <iostream>
 #include <sstream>
 #include <fstream>
@@ -73,13 +78,10 @@ public:
 	vector<vec2> vertex_uvs;
 	vector<Triangle> faces;
 
-	mat4x4 model_matrix;
-	vector<Vertex> vertex_output;
-
 	Mesh();
 
-	void processMatrix();
-	void processVertices(const mat4x4& cam_mat, const mat4x4& proj_mat, const mat4x4& view_mat);
+	mat4x4 processMatrix() const;
+	vector<Vertex> processVertices(const mat4x4& cam_mat, const mat4x4& proj_mat, const mat4x4& view_mat, const mat4x4& model_mat) const;
 
 	static Mesh readObj(string filepath);
 };

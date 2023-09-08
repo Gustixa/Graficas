@@ -1,11 +1,8 @@
 #include "camera.hpp"
 
 camera::camera() {
-	position = vec3(0, 0, 5);
-	rotation = vec3(0, 0, 0);
-	right_vec = vec3(1, 0, 0);
-	up_vec = vec3(0, 1, 0);
-	forward_vec = vec3(0, 0, 1);
+	pos = vec3(0, 0, 5);
+	rot = vec3(0, 0, 0);
 
 	fov = 40.0;
 	near_clip = 0.1;
@@ -25,15 +22,15 @@ void camera::processMatrix(const uint16_t resx, const uint16_t resy) {
 	res_y = resy;
 
 	const mat4x4 translation = mat4x4(
-		1, 0, 0, position.x,
-		0, 1, 0, position.y,
-		0, 0, 1, position.z,
+		1, 0, 0, pos.x,
+		0, 1, 0, pos.y,
+		0, 0, 1, pos.z,
 		0, 0, 0, 1
 	);
 
-	const float Yaw = rotation.x * 0.0174532925;
-	const float Pitch = rotation.y * 0.0174532925;
-	const float Roll = rotation.z * 0.0174532925;
+	const float Yaw = rot.x   * 0.0174532925;
+	const float Pitch = rot.y * 0.0174532925;
+	const float Roll = rot.z  * 0.0174532925;
 
 	const mat4x4 yawMat = mat4x4(
 		cos(Yaw), 0, sin(Yaw), 0,
@@ -56,7 +53,8 @@ void camera::processMatrix(const uint16_t resx, const uint16_t resy) {
 		0, 0, 0, 1
 	);
 
-	camera_mat = translation * (pitchMat * yawMat * rollMat);
+	camera_mat = translation * (pitchMat * yawMat * rollMat); // CAMERA ANCHORED ON 0,0
+	//camera_mat =  (pitchMat * yawMat * rollMat) * translation;
 
 	aspect_ratio = float(res_x) / float(res_y);
 

@@ -11,7 +11,7 @@ using namespace glm;
 
 class camera {
 public:
-	vec3 position, rotation, forward_vec, up_vec, right_vec;
+	vec3 pos, rot;
 	mat4x4 camera_mat, viewport_mat, projection_mat;
 
 	double fov, aspect_ratio;

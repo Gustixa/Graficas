@@ -44,7 +44,7 @@
     <ClInclude Include="source\camera.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\Scene.hpp">
+    <ClInclude Include="source\scene.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

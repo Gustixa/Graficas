@@ -13,23 +13,23 @@ void init(const uint16_t RESX, const uint16_t RESY) {
 	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
 }
 
-void render(Scene scene) {
+void render(Scene& scene) {
 	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 	SDL_RenderClear(renderer);
-
 	SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 
 	scene.cam.processMatrix(scene.RESX, scene.RESY);
+	scene.objects["Saturn Rings"].rot += vec3(1, 1, 1);
+	scene.sun += vec3(2.5, 2.5, 0);
+	scene.Zbuffer = vector<vector<float>>(scene.RESX, vector<float>(scene.RESY, 10000.0f));
 
-	for (Mesh& mesh : scene.objects) {
-		mesh.processMatrix();
-		mesh.processVertices(scene.cam.camera_mat, scene.cam.projection_mat, scene.cam.viewport_mat);
-
-		for (const Triangle& tri : mesh.faces) {
-			const Vertex& v1 = mesh.vertex_output[tri.i1];
-			const Vertex& v2 = mesh.vertex_output[tri.i2];
-			const Vertex& v3 = mesh.vertex_output[tri.i3];
-			renderShaded(renderer, scene, v1, v2, v3);
+	for (const pair<const string, Mesh>& mesh : scene.objects) {
+		const vector<Vertex> vertices = mesh.second.processVertices(scene.cam.camera_mat, scene.cam.projection_mat, scene.cam.viewport_mat, mesh.second.processMatrix());
+		for (const Triangle& tri : mesh.second.faces) {
+			const Vertex& v1 = vertices[tri.i1];
+			const Vertex& v2 = vertices[tri.i2];
+			const Vertex& v3 = vertices[tri.i3];
+			renderShaded(renderer, scene, scene.getSun(), v1, v2, v3);
 		}
 	}
 
@@ -44,7 +44,18 @@ int main(int argc, char* argv[]) {
 	bool running = true;
 	
 	Scene scene = Scene(RESX, RESY);
-	scene.objects.push_back(Mesh::readObj("./resources/Moon.obj"));
+
+	scene.cam.pos = vec3(0,0,10);
+	scene.cam.rot = vec3(0,-15,0);
+
+	scene.objects["Moon"] = Mesh::readObj("./resources/Moon.obj");
+	scene.objects["Saturn"] = Mesh::readObj("./resources/Planet.obj");
+	scene.objects["Saturn Rings"] = Mesh::readObj("./resources/Rings.obj");
+
+	scene.objects["Moon"].pos = vec3(3, 0, 0);
+	scene.objects["Saturn"].pos = vec3(-2.5, 0, 0);
+	scene.objects["Saturn Rings"].pos = vec3(-2.5, 0, 0);
+	scene.objects["Saturn Rings"].rot = vec3(0, 0, 15);
 
 	while (running) {
 		SDL_Event event;

@@ -11,11 +11,9 @@ Mesh::Mesh(){
 	vertex_uvs = vector<vec2>();
 	faces = vector<Triangle>();
 
-	model_matrix = mat4x4();
-	vertex_output = vector<Vertex>();
 }
 
-void Mesh::processMatrix() {
+mat4x4 Mesh::processMatrix() const {
 	const mat4x4 translation = mat4x4(
 		1, 0, 0, pos.x,
 		0, 1, 0, pos.y,
@@ -55,10 +53,10 @@ void Mesh::processMatrix() {
 		0, 0, 0, 1
 	);
 
-	model_matrix = translation * (pitchMat * yawMat * rollMat) * scaleMat;
+	return (pitchMat * yawMat * rollMat) * scaleMat * translation;
 }
 
-void Mesh::processVertices(const mat4x4& cam_mat, const mat4x4& proj_mat, const mat4x4& view_mat) {
+vector<Vertex> Mesh::processVertices(const mat4x4& cam_mat, const mat4x4& proj_mat, const mat4x4& view_mat, const mat4x4& model_mat) const{
 	mat4x4 inverse = glm::inverse(cam_mat);
 	for (int i = 0; i < 4; ++i) {
 		for (int j = 0; j < 4; ++j) {
@@ -68,9 +66,9 @@ void Mesh::processVertices(const mat4x4& cam_mat, const mat4x4& proj_mat, const 
 		}
 	}
 
-	const mat4x4 View_Matrix = mulmat4(mulmat4(mulmat4(model_matrix, view_mat), proj_mat), inverse);
+	const mat4x4 View_Matrix = mulmat4(mulmat4(mulmat4(view_mat, proj_mat), inverse), model_mat);
 
-	vertex_output = vector<Vertex>(vertices.size(), Vertex());
+	vector<Vertex> vertex_output = vector<Vertex>(vertices.size(), Vertex());
 
 	for (const Triangle& Tri : faces) {
 		const vec4 vertShader1 = vec4(vertices[Tri.i1], 1.0f) * View_Matrix;
@@ -110,6 +108,7 @@ void Mesh::processVertices(const mat4x4& cam_mat, const mat4x4& proj_mat, const 
 		vertex_colors.size() == vertices.size() ? vert3.col = vertex_colors[Tri.i3] : vert3.col = vec3(1.0);
 		vertex_output[Tri.i3] = vert3;
 	}
+	return vertex_output;
 }
 
 Mesh Mesh::readObj(string filepath) {
