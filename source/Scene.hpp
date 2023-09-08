@@ -19,16 +19,29 @@ public:
 	vector<vector<float>> Zbuffer;
 
 	vec3 getSun() {
-		float yaw = radians(sun.x);     // Rotation around the Y-axis
-		float pitch = radians(sun.y);   // Rotation around the X-axis
-		float roll = radians(sun.z);     // Rotation around the Z-axis
+		float yaw = radians  (sun.x);    // Rotation around the Y-axis
+		float pitch = radians(sun.y);    // Rotation around the X-axis
+		float roll = radians (sun.z);    // Rotation around the Z-axis
 
 		mat4 rotationMatrix(1.0f);
-		rotationMatrix = rotate(rotationMatrix, yaw, vec3(0.0f, 1.0f, 0.0f));
+		rotationMatrix = rotate(rotationMatrix, yaw,   vec3(0.0f, 1.0f, 0.0f));
 		rotationMatrix = rotate(rotationMatrix, pitch, vec3(1.0f, 0.0f, 0.0f));
-		rotationMatrix = rotate(rotationMatrix, roll, vec3(0.0f, 0.0f, 1.0f));
+		rotationMatrix = rotate(rotationMatrix, roll,  vec3(0.0f, 0.0f, 1.0f));
 
 		return vec3(rotationMatrix * vec4(0.0f, 0.0f, -1.0f, 0.0f));
+	}
+
+	vec3 getCamera() {
+		float yaw = radians  (cam.rot.x);    // Rotation around the Y-axis
+		float pitch = radians(cam.rot.y);    // Rotation around the X-axis
+		float roll = radians (cam.rot.z);    // Rotation around the Z-axis
+
+		mat4 rotationMatrix(1.0f);
+		rotationMatrix = rotate(rotationMatrix, yaw,   vec3(0.0f, 1.0f, 0.0f));
+		rotationMatrix = rotate(rotationMatrix, pitch, vec3(1.0f, 0.0f, 0.0f));
+		rotationMatrix = rotate(rotationMatrix, roll,  vec3(0.0f, 0.0f, 1.0f));
+
+		return vec3(rotationMatrix * vec4(0.0f, 0.0f, 1.0f, 0.0f));
 	}
 };
 

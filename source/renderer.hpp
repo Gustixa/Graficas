@@ -18,3 +18,5 @@ void renderPoint(SDL_Renderer* renderer, const uint16_t resx, const uint16_t res
 void renderLine(SDL_Renderer* renderer, const uint16_t resx, const uint16_t resy, const glm::vec2& pointA, const glm::vec2& pointB);
 
 void renderShaded(SDL_Renderer* renderer, Scene& scene, const vec3& sun, const Vertex& v1, const Vertex& v2, const Vertex& v3);
+
+void renderGas(SDL_Renderer* renderer, Scene& scene, const vec3& sun, const vec3& camera, const Vertex& v1, const Vertex& v2, const Vertex& v3);

@@ -55,6 +55,46 @@ void renderShaded(SDL_Renderer* renderer, Scene& scene, const vec3& sun, const V
 					float Sun_Intensity = dot((u * v1.normal + v * v2.normal + w * v3.normal), sun);
 					Sun_Intensity = clamp(Sun_Intensity, 0.0f, 1.0f);
 					Color *= Sun_Intensity;
+					Color += vec3(0.1); // Ambient Light
+					Color = clamp(Color, 0.0f, 1.0f);
+					if (Depth < scene.Zbuffer[x][y]) {
+						scene.Zbuffer[x][y] = Depth;
+						renderPoint(renderer, scene.RESX, scene.RESY, vec2(x, y), Color);
+					}
+				}
+			}
+		}
+	}
+}
+
+void renderGas(SDL_Renderer* renderer, Scene& scene, const vec3& sun, const vec3& camera, const Vertex& v1, const Vertex& v2, const Vertex& v3) {
+	const int minX = std::min({ v1.pos.x, v2.pos.x, v3.pos.x });
+	const int maxX = std::max({ v1.pos.x, v2.pos.x, v3.pos.x }) + 1;
+	const int minY = std::min({ v1.pos.y, v2.pos.y, v3.pos.y });
+	const int maxY = std::max({ v1.pos.y, v2.pos.y, v3.pos.y }) + 1;
+	for (int x = minX; x < maxX; x++) {
+		for (int y = minY; y < maxY; y++) {
+			if (x >= 0 && x < scene.RESX && y >= 0 && y < scene.RESY) {
+
+				const float AreaPBC = (v2.pos.y - v3.pos.y) * (x - v3.pos.x) + (v3.pos.x - v2.pos.x) * (y - v3.pos.y);
+				const float AreaACP = (v3.pos.y - v1.pos.y) * (x - v3.pos.x) + (v1.pos.x - v3.pos.x) * (y - v3.pos.y);
+				const float AreaABC = (v2.pos.y - v3.pos.y) * (v1.pos.x - v3.pos.x) + (v3.pos.x - v2.pos.x) * (v1.pos.y - v3.pos.y);
+
+				const float u = AreaPBC / AreaABC;
+				const float v = AreaACP / AreaABC;
+				const float w = 1.0 - u - v;
+
+				if (u >= 0.0f && u <= 1.0f && v >= 0.0f && v <= 1.0f && w >= 0.0f && w <= 1.0f) {
+					const float Depth = u * v1.pos.z + v * v2.pos.z + w * v3.pos.z;
+					vec3 Color = v1.col * u + v2.col * v + v3.col * w;
+					float Fresnel_Intensity = dot((u * v1.normal + v * v2.normal + w * v3.normal), camera);
+					Fresnel_Intensity = clamp(Fresnel_Intensity, 0.0f, 1.0f);
+					float Sun_Intensity = dot((u * v1.normal + v * v2.normal + w * v3.normal), sun);
+					Sun_Intensity = clamp(Sun_Intensity, 0.0f, 1.0f);
+					Color *= pow(Fresnel_Intensity, 2.5);
+					Color *= Sun_Intensity;
+					Color += vec3(0.1); // Ambient Light
+					Color = clamp(Color, 0.0f, 1.0f);
 					if (Depth < scene.Zbuffer[x][y]) {
 						scene.Zbuffer[x][y] = Depth;
 						renderPoint(renderer, scene.RESX, scene.RESY, vec2(x, y), Color);

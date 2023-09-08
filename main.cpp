@@ -18,19 +18,36 @@ void render(Scene& scene) {
 	SDL_RenderClear(renderer);
 	SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 
+	scene.cam.rot += vec3(1.5, 0, 0);
 	scene.cam.processMatrix(scene.RESX, scene.RESY);
 	scene.objects["Saturn Rings"].rot += vec3(1, 1, 1);
 	scene.sun += vec3(2.5, 2.5, 0);
 	scene.Zbuffer = vector<vector<float>>(scene.RESX, vector<float>(scene.RESY, 10000.0f));
+	vec3 sun = scene.getSun();
+	vec3 camera = scene.getCamera();
 
-	for (const pair<const string, Mesh>& mesh : scene.objects) {
-		const vector<Vertex> vertices = mesh.second.processVertices(scene.cam.camera_mat, scene.cam.projection_mat, scene.cam.viewport_mat, mesh.second.processMatrix());
-		for (const Triangle& tri : mesh.second.faces) {
-			const Vertex& v1 = vertices[tri.i1];
-			const Vertex& v2 = vertices[tri.i2];
-			const Vertex& v3 = vertices[tri.i3];
-			renderShaded(renderer, scene, scene.getSun(), v1, v2, v3);
-		}
+	vector<Vertex> vertices = scene.objects["Moon"].processVertices(scene.cam.camera_mat, scene.cam.projection_mat, scene.cam.viewport_mat, scene.objects["Moon"].processMatrix());
+	for (const Triangle& tri : scene.objects["Moon"].faces) {
+		const Vertex& v1 = vertices[tri.i1];
+		const Vertex& v2 = vertices[tri.i2];
+		const Vertex& v3 = vertices[tri.i3];
+		renderShaded(renderer, scene, sun, v1, v2, v3);
+	}
+
+	vertices = scene.objects["Saturn"].processVertices(scene.cam.camera_mat, scene.cam.projection_mat, scene.cam.viewport_mat, scene.objects["Saturn"].processMatrix());
+	for (const Triangle& tri : scene.objects["Saturn"].faces) {
+		const Vertex& v1 = vertices[tri.i1];
+		const Vertex& v2 = vertices[tri.i2];
+		const Vertex& v3 = vertices[tri.i3];
+		renderGas(renderer, scene, sun, camera, v1, v2, v3);
+	}
+
+	vertices = scene.objects["Saturn Rings"].processVertices(scene.cam.camera_mat, scene.cam.projection_mat, scene.cam.viewport_mat, scene.objects["Saturn Rings"].processMatrix());
+	for (const Triangle& tri : scene.objects["Saturn Rings"].faces) {
+		const Vertex& v1 = vertices[tri.i1];
+		const Vertex& v2 = vertices[tri.i2];
+		const Vertex& v3 = vertices[tri.i3];
+		renderShaded(renderer, scene, sun, v1, v2, v3);
 	}
 
 	SDL_RenderPresent(renderer);
