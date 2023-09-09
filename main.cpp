@@ -47,7 +47,7 @@ void render(Scene& scene) {
 		const Vertex& v1 = vertices[tri.i1];
 		const Vertex& v2 = vertices[tri.i2];
 		const Vertex& v3 = vertices[tri.i3];
-		renderShaded(renderer, scene, sun, v1, v2, v3);
+		renderGas(renderer, scene, sun, camera, v1, v2, v3);
 	}
 
 	SDL_RenderPresent(renderer);

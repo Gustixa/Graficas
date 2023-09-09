@@ -55,7 +55,7 @@ void renderShaded(SDL_Renderer* renderer, Scene& scene, const vec3& sun, const V
 					float Sun_Intensity = dot((u * v1.normal + v * v2.normal + w * v3.normal), sun);
 					Sun_Intensity = clamp(Sun_Intensity, 0.0f, 1.0f);
 					Color *= Sun_Intensity;
-					Color += vec3(0.1); // Ambient Light
+					Color += vec3(0.05); // Ambient Light
 					Color = clamp(Color, 0.0f, 1.0f);
 					if (Depth < scene.Zbuffer[x][y]) {
 						scene.Zbuffer[x][y] = Depth;
@@ -86,14 +86,14 @@ void renderGas(SDL_Renderer* renderer, Scene& scene, const vec3& sun, const vec3
 
 				if (u >= 0.0f && u <= 1.0f && v >= 0.0f && v <= 1.0f && w >= 0.0f && w <= 1.0f) {
 					const float Depth = u * v1.pos.z + v * v2.pos.z + w * v3.pos.z;
-					vec3 Color = v1.col * u + v2.col * v + v3.col * w;
+					vec3 Color = vec3(0.5, 0.2, 0.2);
 					float Fresnel_Intensity = dot((u * v1.normal + v * v2.normal + w * v3.normal), camera);
 					Fresnel_Intensity = clamp(Fresnel_Intensity, 0.0f, 1.0f);
 					float Sun_Intensity = dot((u * v1.normal + v * v2.normal + w * v3.normal), sun);
 					Sun_Intensity = clamp(Sun_Intensity, 0.0f, 1.0f);
-					Color *= pow(Fresnel_Intensity, 2.5);
+					Color *= pow(Fresnel_Intensity, 0.5);
 					Color *= Sun_Intensity;
-					Color += vec3(0.1); // Ambient Light
+					Color += vec3(0.05); // Ambient Light
 					Color = clamp(Color, 0.0f, 1.0f);
 					if (Depth < scene.Zbuffer[x][y]) {
 						scene.Zbuffer[x][y] = Depth;
