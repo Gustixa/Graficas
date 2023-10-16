@@ -22,7 +22,7 @@
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
     <ProjectGuid>{472e4ebe-4270-4f6d-968c-a57860a048f3}</ProjectGuid>
-    <RootNamespace>TempGraficas</RootNamespace>
+    <RootNamespace>Graficas</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
     <ProjectName>Graficas</ProjectName>
   </PropertyGroup>

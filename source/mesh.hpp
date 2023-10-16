@@ -46,7 +46,7 @@ struct Parser {
 struct Triangle {
 	size_t i1, i2, i3 ,u1, u2, u3 ,n1 ,n2, n3;
 	Triangle(){
-		i1 = 0; i2 = 0; i3 = 0;
+		i1 = -1; i2 = -1; i3 = -1;
 		u1 = -1; u2 = -1; u3 = -1;
 		n1 = -1; n2 = -1; n3 = -1;
 	}
