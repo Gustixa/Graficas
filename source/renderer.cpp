@@ -1,5 +1,11 @@
 #include "renderer.hpp"
 
+enum Shader {
+	GOURAD,
+	SUN,
+	GAS
+};
+
 void renderPoint(SDL_Renderer* renderer, const uint16_t resx, const uint16_t resy, const glm::ivec2& point, const glm::vec3& color) {
 
 	if (point.x < resx && point.x >= 0 && point.y < resy && point.y >= 0) {
@@ -32,7 +38,7 @@ void renderLine(SDL_Renderer* renderer, const uint16_t resx, const uint16_t resy
 	}
 }
 
-void renderMesh(SDL_Renderer* renderer, Scene& scene, const vec3& sun, const Camera& camera, const Mesh& mesh) {
+void renderMesh(SDL_Renderer* renderer, Scene& scene, const Camera& camera, const Mesh& mesh) {
 	for (const Triangle& tri : mesh.faces) {
 		const Vertex& v1 = mesh.output[tri.i1];
 		const Vertex& v2 = mesh.output[tri.i2];
@@ -56,7 +62,10 @@ void renderMesh(SDL_Renderer* renderer, Scene& scene, const vec3& sun, const Cam
 						if (u >= 0.0f && u <= 1.0f && v >= 0.0f && v <= 1.0f && w >= 0.0f && w <= 1.0f) {
 							const float Depth = u * v1.pos.z + v * v2.pos.z + w * v3.pos.z;
 							vec3 Color = v1.col * u + v2.col * v + v3.col * w;
-							float Sun_Intensity = dot((u * v1.normal + v * v2.normal + w * v3.normal), sun);
+
+							vec3 Sun = normalize((u * v1.pos + v * v2.pos + w * v3.pos));
+
+							float Sun_Intensity = dot((u * v1.normal + v * v2.normal + w * v3.normal), Sun);
 							Sun_Intensity = glm::clamp(Sun_Intensity, 0.0f, 1.0f);
 							Color *= Sun_Intensity;
 							Color += vec3(0.05); // Ambient Light

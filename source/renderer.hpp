@@ -8,5 +8,5 @@
 
 void renderPoint(SDL_Renderer* renderer, const uint16_t resx, const uint16_t resy, const glm::ivec2& point, const glm::vec3& color);
 void renderLine(SDL_Renderer* renderer, const uint16_t resx, const uint16_t resy, const glm::vec2& pointA, const glm::vec2& pointB);
-void renderMesh(SDL_Renderer* renderer, Scene& scene, const vec3& sun, const Camera& camera, const Mesh& mesh);
+void renderMesh(SDL_Renderer* renderer, Scene& scene, const Camera& camera, const Mesh& mesh);
 void renderGas(SDL_Renderer* renderer, Scene& scene, const vec3& sun, const Camera& camera, const Mesh& mesh);
