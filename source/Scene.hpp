@@ -1,11 +1,13 @@
 #pragma once
 
+#include "texture.hpp"
 #include "mesh.hpp"
 #include "camera.hpp"
 
 struct Scene {
 	uint16_t RESX, RESY;
 	map<string, Mesh> objects;
+	map<string, Texture> textures;
 	Camera cam;
 	Scene(uint16_t resx, uint16_t resy) {
 		RESX = resx;

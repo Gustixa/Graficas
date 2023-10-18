@@ -54,7 +54,8 @@ enum Keys {
 	KEY_UP,
 	KEY_DOWN,
 	KEY_RIGHT,
-	KEY_LEFT
+	KEY_LEFT,
+	KEY_R,
 };
 
 inline Keys getKey(const SDL_Keycode& key) {
@@ -69,6 +70,7 @@ inline Keys getKey(const SDL_Keycode& key) {
 	case SDLK_DOWN: return Keys::KEY_DOWN;
 	case SDLK_LEFT: return Keys::KEY_LEFT;
 	case SDLK_RIGHT: return Keys::KEY_RIGHT;
+	case SDLK_r: return Keys::KEY_R;
 	default: return Keys::NONE;
 	};
 }

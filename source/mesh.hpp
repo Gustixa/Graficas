@@ -1,7 +1,8 @@
 #pragma once
 
-#include"include.hpp"
+#include "include.hpp"
 
+struct Scene;
 struct Parser;
 struct Vertex;
 struct Triangle;
@@ -68,170 +69,13 @@ struct Mesh {
 	vector<vec2> vertex_uvs;
 
 	vector<Triangle> faces;
-	vector<Vertex> output;
 
-	Mesh() {
-		rotation = vec3(0.0f);
-		position = vec3(0.0f);
-		scale = vec3(1.0f);
+	vector<Triangle> output_faces;
+	map<size_t, Vertex> output_vertices;
 
-		vertex_positions = vector<glm::vec3>();
-		vertex_normals = vector<vec3>();
-		vertex_colors = vector<vec3>();
-		vertex_uvs = vector<vec2>();
-		faces = vector<Triangle>();
-		output = vector<Vertex>();
-	}
+	Mesh();
 
-	mat4 process() const {
-		const mat4 translation_matrix = mat4(
-			1, 0, 0, position.x,
-			0, 1, 0, position.y,
-			0, 0, 1, position.z,
-			0, 0, 0, 1
-		);
-
-		const float Yaw   = rotation.x * DEG_RAD;
-		const float Pitch = rotation.y * DEG_RAD;
-		const float Roll  = rotation.z * DEG_RAD;
-
-		mat4 rotation_Matrix = mat4(1.0f);  // Start with an identity matrix
-		rotation_Matrix = glm::rotate(rotation_Matrix, Yaw, vec3(0.0f, 1.0f, 0.0f));
-		rotation_Matrix = glm::rotate(rotation_Matrix, Pitch, vec3(1.0f, 0.0f, 0.0f));
-		rotation_Matrix = glm::rotate(rotation_Matrix, Roll, vec3(0.0f, 0.0f, 1.0f));
-
-		const mat4 scale_matrix = mat4(
-			scale.x, 0, 0, 0,
-			0, scale.y, 0, 0,
-			0, 0, scale.z, 0,
-			0, 0, 0, 1
-		);
-
-		return rotation_Matrix * scale_matrix * translation_matrix;
-	}
-
-	void processVertices(const mat4& cam_mat, const mat4& proj_mat, const mat4& view_mat, const mat4& model_mat) {
-		mat4 inverse = glm::inverse(cam_mat);
-		for (int i = 0; i < 4; ++i) {
-			for (int j = 0; j < 4; ++j) {
-				if (inverse[i][j] == -0.0f) {
-					inverse[i][j] = 0.0f;
-				}
-			}
-		}
-
-		const mat4 View_Matrix = mulmat4(mulmat4(mulmat4(view_mat, proj_mat), inverse), model_mat);
-
-		output = vector<Vertex>(vertex_positions.size(), Vertex());
-
-		for (const Triangle& Tri : faces) {
-			const vec4 vertShader1 = vec4(vertex_positions[Tri.i1], 1.0f) * View_Matrix;
-			const vec4 vertShader2 = vec4(vertex_positions[Tri.i2], 1.0f) * View_Matrix;
-			const vec4 vertShader3 = vec4(vertex_positions[Tri.i3], 1.0f) * View_Matrix;
-
-			Vertex vert1 = Vertex();
-			vert1.pos = vec3(
-				vertShader1.x / vertShader1.w,
-				vertShader1.y / vertShader1.w,
-				vertShader1.z / vertShader1.w
-			);
-			Tri.u1 != -1 ? vert1.texcoord = vertex_uvs[Tri.u1] : vert1.texcoord = vec2(0);
-			Tri.n1 != -1 ? vert1.normal = vertex_normals[Tri.n1] : vert1.normal = vec3(0);
-			vertex_colors.size() == vertex_positions.size() ? vert1.col = vertex_colors[Tri.i1] : vert1.col = vec3(1.0);
-			output[Tri.i1] = vert1;
-
-			Vertex vert2 = Vertex();
-			vert2.pos = vec3(
-				vertShader2.x / vertShader2.w,
-				vertShader2.y / vertShader2.w,
-				vertShader2.z / vertShader2.w
-			);
-			Tri.u2 != -1 ? vert2.texcoord = vertex_uvs[Tri.u2] : vert2.texcoord = vec2(0);
-			Tri.n2 != -1 ? vert2.normal = vertex_normals[Tri.n2] : vert2.normal = vec3(0);
-			vertex_colors.size() == vertex_positions.size() ? vert2.col = vertex_colors[Tri.i2] : vert2.col = vec3(1.0);
-			output[Tri.i2] = vert2;
-
-			Vertex vert3 = Vertex();
-			vert3.pos = vec3(
-				vertShader3.x / vertShader3.w,
-				vertShader3.y / vertShader3.w,
-				vertShader3.z / vertShader3.w
-			);
-			Tri.u3 != -1 ? vert3.texcoord = vertex_uvs[Tri.u3] : vert3.texcoord = vec2(0);
-			Tri.n3 != -1 ? vert3.normal = vertex_normals[Tri.n3] : vert3.normal = vec3(0);
-			vertex_colors.size() == vertex_positions.size() ? vert3.col = vertex_colors[Tri.i3] : vert3.col = vec3(1.0);
-			output[Tri.i3] = vert3;
-		}
-	}
-
-	static Mesh readObj(string filepath) {
-		ifstream file(filepath, ios::in);
-
-		Mesh mesh = Mesh();
-
-		string line;
-		while (getline(file, line)) {
-			vector<string> token = Parser::splitString(line);
-			if (!token.empty()) {
-				if (token[0] == "v") {
-					glm::vec3 pos(
-						stof(token[1]),
-						stof(token[2]),
-						stof(token[3])
-					);
-					mesh.vertex_positions.push_back(pos);
-					if (token.size() > 6) {
-						vec3 Color = vec3(
-							stof(token[4]),
-							stof(token[5]),
-							stof(token[6])
-						);
-						mesh.vertex_colors.push_back(Color);
-					}
-				}
-				else if (token[0] == "vt") {
-					vec2 Pos(
-						stod(token[1]),
-						stod(token[2])
-					);
-					mesh.vertex_uvs.push_back(Pos);
-				}
-				else if (token[0] == "vn") {
-					vec3 Normal(
-						stod(token[1]),
-						stod(token[2]),
-						stod(token[3])
-					);
-					mesh.vertex_normals.push_back(Normal);
-				}
-				else if (token[0] == "f") {
-					vector<string> v1 = Parser::splitStringD(token[1], "/");
-					vector<string> v2 = Parser::splitStringD(token[2], "/");
-					vector<string> v3 = Parser::splitStringD(token[3], "/");
-
-					Triangle triangle = Triangle();
-					triangle.i1 = stoull(v1[0]) - 1;
-					triangle.i2 = stoull(v2[0]) - 1;
-					triangle.i3 = stoull(v3[0]) - 1;
-
-					if (v1.size() == 3) {
-						if (!v1[1].empty()) {
-							triangle.u1 = stoull(v1[1]) - 1;
-							triangle.u2 = stoull(v2[1]) - 1;
-							triangle.u3 = stoull(v3[1]) - 1;
-						}
-
-						if (!v1[2].empty()) {
-							triangle.n1 = stoull(v1[2]) - 1;
-							triangle.n2 = stoull(v2[2]) - 1;
-							triangle.n3 = stoull(v3[2]) - 1;
-						}
-					}
-
-					mesh.faces.push_back(triangle);
-				}
-			}
-		}
-		return mesh;
-	}
+	mat4 process() const;
+	void processVertices(const Scene& scene);
+	static Mesh readObj(string filepath);
 };
