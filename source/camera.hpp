@@ -67,11 +67,25 @@ struct Camera {
 
 		position += (x_vec * x + y_vec * y + z_vec * z) * sensitivity;
 		position.x = glm::clamp(position.x, -5000.0f, 5000.0f);
-		position.y = glm::clamp(position.y,   10.0f, 5000.0f);
+		position.y = glm::clamp(position.y,     0.0f, 5000.0f);
 		position.z = glm::clamp(position.z, -5000.0f, 5000.0f);
 	}
 
 	void rotate_camera(const float& x, const float& y, const float& z, const float& sensitivity) {
 		rotation += vec3(x, y, z) * sensitivity;
+	}
+
+	void view(const vec3& eye_pos, const vec3& object) {
+		mat4 rotation_Matrix = mat4(1.0f);
+		rotation_Matrix = rotate(rotation_Matrix, (rotation.y) * DEG_RAD, vec3(0.0f, 1.0f, 0.0f));
+		rotation_Matrix = rotate(rotation_Matrix, (rotation.x) * DEG_RAD, vec3(1.0f, 0.0f, 0.0f));
+		rotation_Matrix = rotate(rotation_Matrix, (rotation.z) * DEG_RAD, vec3(0.0f, 0.0f, 1.0f));
+
+		vec3 y_vec = vec3(rotation_Matrix * vec4(0.0f, 1.0f, 0.0f, 0.0f));
+
+		const mat4 viewMatrix = lookAt(eye_pos, object, y_vec);
+		rotation.x = degrees(asin(-viewMatrix[1][2]));
+		rotation.y = degrees(atan2(viewMatrix[0][2], viewMatrix[2][2]));
+		rotation.z = degrees(atan2(viewMatrix[1][0], viewMatrix[1][1]));
 	}
 };

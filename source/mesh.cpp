@@ -95,9 +95,9 @@ void Mesh::processVertices(const Scene& scene) {
 		if ((vert1.pos.x >= 0 && vert1.pos.x < scene.RESX &&
 			vert1.pos.y >= 0 && vert1.pos.y < scene.RESY) ||
 			(vert2.pos.x >= 0 && vert2.pos.x < scene.RESX &&
-				vert2.pos.y >= 0 && vert2.pos.y < scene.RESY) ||
+			vert2.pos.y >= 0 && vert2.pos.y < scene.RESY) ||
 			(vert3.pos.x >= 0 && vert3.pos.x < scene.RESX &&
-				vert3.pos.y >= 0 && vert3.pos.y < scene.RESY)
+			vert3.pos.y >= 0 && vert3.pos.y < scene.RESY)
 			)
 		{
 			output_faces.push_back(Tri);
@@ -135,16 +135,16 @@ Mesh Mesh::readObj(string filepath) {
 			}
 			else if (token[0] == "vt") {
 				vec2 Pos(
-					stod(token[1]),
-					stod(token[2])
+					stof(token[1]),
+					stof(token[2])
 				);
 				mesh.vertex_uvs.push_back(Pos);
 			}
 			else if (token[0] == "vn") {
 				vec3 Normal(
-					stod(token[1]),
-					stod(token[2]),
-					stod(token[3])
+					stof(token[1]),
+					stof(token[2]),
+					stof(token[3])
 				);
 				mesh.vertex_normals.push_back(Normal);
 			}
@@ -171,7 +171,6 @@ Mesh Mesh::readObj(string filepath) {
 						triangle.n3 = stoull(v3[2]) - 1;
 					}
 				}
-
 				mesh.faces.push_back(triangle);
 			}
 		}

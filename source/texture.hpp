@@ -2,5 +2,13 @@
 
 #include "include.hpp"
 
-using Texture = vector<vector<vec3>>;
-vector<vector<vec3>> loadImage(const char* imagePath);
+struct Texture {
+	vector<vector<vec3>> data;
+	int width, height;
+
+	Texture();
+	Texture(const char* imagePath);
+
+	void loadImage(const char* imagePath);
+	vec3 getColor(const vec2& uv) const;
+};

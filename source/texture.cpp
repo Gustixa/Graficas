@@ -3,17 +3,24 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
-vector<vector<vec3>> loadImage(const char* imagePath) {
-	int width, height, channels;
+Texture::Texture() {
+	width = 0;
+	height = 0;
+	data = vector<vector<vec3>>();
+}
 
-	// Load the image using stb_image.h
+Texture::Texture(const char* imagePath) {
+	loadImage(imagePath);
+}
+
+void Texture::loadImage(const char* imagePath) {
+	int channels;
 	unsigned char* image_data = stbi_load(imagePath, &width, &height, &channels, 3);
 
 	if (!image_data) {
 		cerr << "Error loading image." << endl;
 		exit(1);
 	}
-
 	vector<vector<vec3>> result;
 
 	for (int y = 0; y < height; ++y) {
@@ -31,7 +38,12 @@ vector<vector<vec3>> loadImage(const char* imagePath) {
 		}
 		result.push_back(row);
 	}
-	return result;
-
+	data = result;
 	stbi_image_free(image_data);
+}
+
+vec3 Texture::getColor(const vec2& uv) const {
+	const size_t pixelX = size_t(uv.x * float(width)) % width;
+	const size_t pixelY = size_t(float(height) - uv.y * float(height)) % height;
+	return data[pixelY][pixelX];
 }

@@ -19,6 +19,7 @@
 #include <cerrno>
 #include <vector>
 #include <math.h>
+#include <string>
 #include <ctime>
 #include <array>
 #include <map>
@@ -51,6 +52,8 @@ enum Keys {
 	KEY_D,
 	KEY_Q,
 	KEY_E,
+	KEY_UP,
+	KEY_DOWN,
 	KEY_R,
 };
 
@@ -63,6 +66,8 @@ inline Keys getKey(const SDL_Keycode& key) {
 	case SDLK_e: return Keys::KEY_E;
 	case SDLK_q: return Keys::KEY_Q;
 	case SDLK_r: return Keys::KEY_R;
+	case SDLK_UP: return Keys::KEY_UP;
+	case SDLK_DOWN: return Keys::KEY_DOWN;
 	default: return Keys::NONE;
 	};
 }

@@ -37,9 +37,9 @@ void renderMesh(SDL_Renderer* renderer, Scene& scene, const Mesh& mesh, const ve
 		const Vertex& v2 = mesh.output_vertices.at(tri.i2);
 		const Vertex& v3 = mesh.output_vertices.at(tri.i3);
 		const float minX = std::min({ v1.pos.x, v2.pos.x, v3.pos.x });
-		const float maxX = std::max({ v1.pos.x, v2.pos.x, v3.pos.x }) + 1;
+		const float maxX = std::max({ v1.pos.x, v2.pos.x, v3.pos.x }) + 1.0f;
 		const float minY = std::min({ v1.pos.y, v2.pos.y, v3.pos.y });
-		const float maxY = std::max({ v1.pos.y, v2.pos.y, v3.pos.y }) + 1;
+		const float maxY = std::max({ v1.pos.y, v2.pos.y, v3.pos.y }) + 1.0f;
 		for (int x = minX; x < maxX; x++) {
 			for (int y = minY; y < maxY; y++) {
 				if (x >= 0 && x < scene.RESX && y >= 0 && y < scene.RESY) {
@@ -49,23 +49,58 @@ void renderMesh(SDL_Renderer* renderer, Scene& scene, const Mesh& mesh, const ve
 
 					const float u = AreaPBC / AreaABC;
 					const float v = AreaACP / AreaABC;
-					const float w = 1.0 - u - v;
+					const float w = 1.0f - u - v;
 
 					if (u >= 0.0f && u <= 1.0f && v >= 0.0f && v <= 1.0f && w >= 0.0f && w <= 1.0f) {
 						const float Depth = u * v1.pos.z + v * v2.pos.z + w * v3.pos.z;
-						vec3 Color = color;
-						vec3 Normal = normalize(u * v1.normal + v * v2.normal + w * v3.normal);
+						switch (type) {
+							case SUN:
+								if (Depth < scene.Zbuffer[x][y]) {
+									scene.Zbuffer[x][y] = Depth;
 
-						vec3 Sun = normalize(-(u * v1.pos + v * v2.pos + w * v3.pos));
+									const vec2 uv = vec2(
+										u * v1.texcoord.x + v * v2.texcoord.x + w * v3.texcoord.x,
+										u * v1.texcoord.y + v * v2.texcoord.y + w * v3.texcoord.y
+									);
+									renderPoint(renderer, scene.RESX, scene.RESY, vec2(x, y), texture.getColor(uv));
+								}
+							case GOURAD:
+								if (Depth < scene.Zbuffer[x][y]) {
+									scene.Zbuffer[x][y] = Depth;
 
-						float Sun_Intensity = pow(dot(Normal, Sun), 2);
-						Sun_Intensity = glm::clamp(Sun_Intensity, 0.0f, 1.0f);
-						Color *= Sun_Intensity;
-						Color += vec3(0.05f); // Ambient Light
-						Color = clamp(Color, 0.0f, 1.0f);
-						if (Depth < scene.Zbuffer[x][y]) {
-							scene.Zbuffer[x][y] = Depth;
-							renderPoint(renderer, scene.RESX, scene.RESY, vec2(x, y), Color);
+									const vec2 uv = vec2(
+										u * v1.texcoord.x + v * v2.texcoord.x + w * v3.texcoord.x,
+										u * v1.texcoord.y + v * v2.texcoord.y + w * v3.texcoord.y
+									);
+									vec3 Color = texture.getColor(uv);
+									vec3 Normal = normalize(u * v1.normal + v * v2.normal + w * v3.normal);
+									vec3 Sun = normalize(-(u * v1.pos + v * v2.pos + w * v3.pos));
+									float Sun_Intensity = pow(dot(Normal, Sun), 2);
+									Sun_Intensity = glm::clamp(Sun_Intensity, 0.0f, 1.0f);
+									Color *= Sun_Intensity;
+									Color += vec3(0.05f); // Ambient Light
+									Color = clamp(Color, 0.0f, 1.0f);
+									renderPoint(renderer, scene.RESX, scene.RESY, vec2(x, y), Color);
+								}
+							case CLOUDS:
+								if (Depth < scene.Zbuffer[x][y]) {
+
+									const vec2 uv = vec2(
+										u * v1.texcoord.x + v * v2.texcoord.x + w * v3.texcoord.x,
+										u * v1.texcoord.y + v * v2.texcoord.y + w * v3.texcoord.y
+									);
+									vec3 Color = texture.getColor(uv);
+									if (Color.x > 0.005f && Color.x > 0.005f && Color.x > 0.005f) {
+										scene.Zbuffer[x][y] = Depth;
+										vec3 Normal = normalize(u * v1.normal + v * v2.normal + w * v3.normal);
+										vec3 Sun = normalize(-(u * v1.pos + v * v2.pos + w * v3.pos));
+										float Sun_Intensity = pow(dot(Normal, Sun), 2);
+										Sun_Intensity = glm::clamp(Sun_Intensity, 0.0f, 1.0f);
+										Color *= Sun_Intensity;
+										Color = clamp(Color, 0.0f, 1.0f);
+										renderPoint(renderer, scene.RESX, scene.RESY, vec2(x, y), Color);
+									}
+								}
 						}
 					}
 				}
