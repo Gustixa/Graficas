@@ -43,9 +43,38 @@ using namespace glm;
 #define INVERTED_PI float(0.31830989f)
 #define DEG_RAD     float(0.01745329f)
 
+enum Keys {
+	NONE,
+	KEY_W,
+	KEY_A,
+	KEY_S,
+	KEY_D,
+	KEY_Q,
+	KEY_E,
+	KEY_UP,
+	KEY_DOWN,
+	KEY_RIGHT,
+	KEY_LEFT
+};
 
-inline mat4x4 mulmat4(mat4x4 a, mat4x4 b) {
-	mat4x4 Result = mat4x4();
+inline Keys getKey(const SDL_Keycode& key) {
+	switch (key) {
+	case SDLK_w: return Keys::KEY_W;
+	case SDLK_a: return Keys::KEY_A;
+	case SDLK_s: return Keys::KEY_S;
+	case SDLK_d: return Keys::KEY_D;
+	case SDLK_e: return Keys::KEY_E;
+	case SDLK_q: return Keys::KEY_Q;
+	case SDLK_UP: return Keys::KEY_UP;
+	case SDLK_DOWN: return Keys::KEY_DOWN;
+	case SDLK_LEFT: return Keys::KEY_LEFT;
+	case SDLK_RIGHT: return Keys::KEY_RIGHT;
+	default: return Keys::NONE;
+	};
+}
+
+inline mat4 mulmat4(mat4 a, mat4 b) {
+	mat4 Result = mat4();
 	for (int i = 0; i < 4; ++i) {
 		for (int j = 0; j < 4; ++j) {
 			for (int k = 0; k < 4; ++k) {

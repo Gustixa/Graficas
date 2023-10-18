@@ -6,10 +6,11 @@
 
 SDL_Window* window = nullptr;
 SDL_Renderer* renderer = nullptr;
-array<bool, 348> input = array<bool, 348>();
+array<bool, 11> input = array<bool, 11>();
 
 // Variables
-const float moveSensitivity = 1.0;
+float moveSensitivity = 1.0;
+float lookSensitivity = 25.0;
 const uint16_t RESX = 600;
 const uint16_t RESY = 400;
 
@@ -29,8 +30,8 @@ int main(int argc, char* argv[]) {
 
 	Scene scene = Scene(RESX, RESY);
 
-	scene.cam.pos = vec3(0, 0, 10);
-	scene.cam.rot = vec3(0);
+	scene.cam.position = vec3(0, 0, 10);
+	scene.cam.rotation = vec3(0, 0, 0);
 
 	scene.objects["Sun"]          = Mesh::readObj("./resources/planet.obj");
 	scene.objects["Earth"]        = Mesh::readObj("./resources/planet.obj");
@@ -38,11 +39,11 @@ int main(int argc, char* argv[]) {
 	scene.objects["Saturn"]       = Mesh::readObj("./resources/planet.obj");
 	scene.objects["Saturn Rings"] = Mesh::readObj("./resources/rings.obj");
 
-	scene.objects["Sun"].pos          = vec3(0, 0, 0);
-	scene.objects["Earth"].pos        = vec3(5, 0, 0);
-	scene.objects["Moon"].pos         = vec3(7, 0, 0);
-	scene.objects["Saturn"].pos       = vec3(0, 0, 0);
-	scene.objects["Saturn Rings"].pos = vec3(0, 0, 0);
+	scene.objects["Sun"].position          = vec3(0, 0, 0);
+	scene.objects["Earth"].position        = vec3(5, 0, 0);
+	scene.objects["Moon"].position         = vec3(7, 0, 0);
+	scene.objects["Saturn"].position       = vec3(0, 0, 0);
+	scene.objects["Saturn Rings"].position = vec3(0, 0, 0);
 
 	scene.objects["Earth"].scale  = vec3(0.5);
 	scene.objects["Moon"].scale   = vec3(0.2);
@@ -54,13 +55,20 @@ int main(int argc, char* argv[]) {
 				running = false;
 			}
 			else if (event.type == SDL_KEYDOWN) {
-				input[event.key.keysym.sym] = true;
+				input[getKey(event.key.keysym.sym)] = true;
 			}
 			else if (event.type == SDL_KEYUP) {
-				input[event.key.keysym.sym] = false;
+				input[getKey(event.key.keysym.sym)] = false;
 				if (event.key.keysym.sym == SDLK_ESCAPE) {
 					SDL_Quit();
 					return 0;
+				}
+			}
+			else if (event.type == SDL_MOUSEWHEEL) {
+				if (event.wheel.preciseY > 0)
+					moveSensitivity *= 1.1;
+				if (event.wheel.preciseY < 0) {
+					moveSensitivity /= 1.1;
 				}
 			}
 		}
@@ -98,18 +106,21 @@ void render(Scene& scene) {
 
 
 	// User Input Update
-	if (input[SDLK_w]) scene.cam.move(0.0, 0.0,  1.0, moveSensitivity * delta_time);
-	if (input[SDLK_s]) scene.cam.move(0.0, 0.0, -1.0, moveSensitivity * delta_time);
-	if (input[SDLK_d]) scene.cam.move( 1.0, 0.0, 0.0, moveSensitivity * delta_time);
-	if (input[SDLK_a]) scene.cam.move(-1.0, 0.0, 0.0, moveSensitivity * delta_time);
-	if (input[SDLK_e]) scene.cam.move(0.0,  1.0, 0.0, moveSensitivity * delta_time);
-	if (input[SDLK_q]) scene.cam.move(0.0, -1.0, 0.0, moveSensitivity * delta_time);
+	if (input[KEY_W]) scene.cam.move_camera( 0.0,  0.0,  1.0, moveSensitivity * delta_time);
+	if (input[KEY_S]) scene.cam.move_camera( 0.0,  0.0, -1.0, moveSensitivity * delta_time);
+	if (input[KEY_D]) scene.cam.move_camera( 1.0,  0.0,  0.0, moveSensitivity * delta_time);
+	if (input[KEY_A]) scene.cam.move_camera(-1.0,  0.0,  0.0, moveSensitivity * delta_time);
+	if (input[KEY_E]) scene.cam.move_camera( 0.0,  1.0,  0.0, moveSensitivity * delta_time);
+	if (input[KEY_Q]) scene.cam.move_camera( 0.0, -1.0,  0.0, moveSensitivity * delta_time);
+	if (input[KEY_DOWN])  scene.cam.rotate_camera(  0.0,  1.0, 0.0, lookSensitivity * delta_time);
+	if (input[KEY_UP])    scene.cam.rotate_camera(  0.0, -1.0, 0.0, lookSensitivity * delta_time);
+	if (input[KEY_RIGHT]) scene.cam.rotate_camera(  1.0,  0.0, 0.0, lookSensitivity * delta_time);
+	if (input[KEY_LEFT])  scene.cam.rotate_camera( -1.0,  0.0, 0.0, lookSensitivity * delta_time);
 	// Scene Update
 	scene.cam.process(scene.RESX, scene.RESY);
-	//scene.objects["Saturn Rings"].rot += vec3(0.5, 0, 0);
-	rotateAroundAnchor(scene.objects["Earth"].pos, scene.objects["Sun"].pos, vec3(0, 1.0 * delta_time, 0));
-	rotateAroundAnchor(scene.objects["Moon"].pos, scene.objects["Earth"].pos, vec3(0, -5.0 * delta_time, 0));
-	scene.objects["Moon"].rot += vec3(0, -5.0 * delta_time, 0);
+	rotateAroundAnchor(scene.objects["Earth"].position, scene.objects["Sun"].position, vec3(0, 0.2 * delta_time, 0));
+	rotateAroundAnchor(scene.objects["Moon"].position, scene.objects["Earth"].position, vec3(0, -2.0 * delta_time, 0));
+	scene.objects["Moon"].rotation += vec3(-40.0 * delta_time, 0, 0);
 
 	// Scene Render
 	scene.objects["Sun"].processVertices(scene.cam.camera_mat, scene.cam.projection_mat, scene.cam.viewport_mat, scene.objects["Sun"].process());

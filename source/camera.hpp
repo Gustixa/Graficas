@@ -2,175 +2,173 @@
 
 #include "include.hpp"
 
-struct Camera {
-	vec3 pos, rot;
-	mat4x4 camera_mat, viewport_mat, projection_mat;
-	array<vec4, 6> frustum;
+enum Planes {
+	Left,
+	Right,
+	Bottom,
+	Top,
+	Near,
+	Far,
+	Count,
+	Combinations = Count * (Count - 1) / 2
+};
 
-	double fov, aspect_ratio;
-	double near_clip, far_clip;
-	uint32_t res_x, res_y;
+struct Frustum {
+	vec4 m_planes[Count];
+	vec3 m_points[8];
 
+	Frustum() {}
+	Frustum(const mat4& projection_matrix) {
+		mat4 matrix = transpose(projection_matrix);
+		m_planes[Left]   = matrix[3] + matrix[0];
+		m_planes[Right]  = matrix[3] - matrix[0];
+		m_planes[Bottom] = matrix[3] + matrix[1];
+		m_planes[Top]    = matrix[3] - matrix[1];
+		m_planes[Near]   = matrix[3] + matrix[2];
+		m_planes[Far]    = matrix[3] - matrix[2];
 
-	Camera() {
-		pos = vec3(0, 0, 5);
-		rot = vec3(0, 0, 0);
+		vec3 crosses[Combinations] = {
+			cross(vec3(m_planes[Left  ]), vec3(m_planes[Right ])),
+			cross(vec3(m_planes[Left  ]), vec3(m_planes[Bottom])),
+			cross(vec3(m_planes[Left  ]), vec3(m_planes[Top   ])),
+			cross(vec3(m_planes[Left  ]), vec3(m_planes[Near  ])),
+			cross(vec3(m_planes[Left  ]), vec3(m_planes[Far   ])),
+			cross(vec3(m_planes[Right ]), vec3(m_planes[Bottom])),
+			cross(vec3(m_planes[Right ]), vec3(m_planes[Top   ])),
+			cross(vec3(m_planes[Right ]), vec3(m_planes[Near  ])),
+			cross(vec3(m_planes[Right ]), vec3(m_planes[Far   ])),
+			cross(vec3(m_planes[Bottom]), vec3(m_planes[Top   ])),
+			cross(vec3(m_planes[Bottom]), vec3(m_planes[Near  ])),
+			cross(vec3(m_planes[Bottom]), vec3(m_planes[Far   ])),
+			cross(vec3(m_planes[Top   ]), vec3(m_planes[Near  ])),
+			cross(vec3(m_planes[Top   ]), vec3(m_planes[Far   ])),
+			cross(vec3(m_planes[Near  ]), vec3(m_planes[Far   ]))
+		};
 
-		fov = 40.0;
-		near_clip = 0.1;
-		far_clip = 1000.0;
-		res_x = 1800;
-		res_y = 1100;
-
-		aspect_ratio = double(res_x) / double(res_y);
-
-		camera_mat = mat4x4();
-		viewport_mat = mat4x4();
-		projection_mat = mat4x4();
-		frustum = array<vec4, 6>() ;
+		m_points[0] = intersection<Left , Bottom, Near>(crosses);
+		m_points[1] = intersection<Left , Top   , Near>(crosses);
+		m_points[2] = intersection<Right, Bottom, Near>(crosses);
+		m_points[3] = intersection<Right, Top   , Near>(crosses);
+		m_points[4] = intersection<Left , Bottom, Far >(crosses);
+		m_points[5] = intersection<Left , Top   , Far >(crosses);
+		m_points[6] = intersection<Right, Bottom, Far >(crosses);
+		m_points[7] = intersection<Right, Top   , Far >(crosses);
 	}
 
-	bool insideFrustum(const Vertex& v1, const Vertex& v2, const Vertex& v3) const {
-		for (const auto& plane : frustum) {
-			if (distancePlainToPoint(plane, v1.pos) < 0 &&
-				distancePlainToPoint(plane, v2.pos) < 0 &&
-				distancePlainToPoint(plane, v3.pos) < 0) {
-				return false; // Triangle is outside this plane
+	bool inside(const vec3& minp, const vec3& maxp) const {
+		for (int i = 0; i < Count; i++) {
+			if ((dot(m_planes[i], vec4(minp.x, minp.y, minp.z, 1.0f)) < 0.0) &&
+				(dot(m_planes[i], vec4(maxp.x, minp.y, minp.z, 1.0f)) < 0.0) &&
+				(dot(m_planes[i], vec4(minp.x, maxp.y, minp.z, 1.0f)) < 0.0) &&
+				(dot(m_planes[i], vec4(maxp.x, maxp.y, minp.z, 1.0f)) < 0.0) &&
+				(dot(m_planes[i], vec4(minp.x, minp.y, maxp.z, 1.0f)) < 0.0) &&
+				(dot(m_planes[i], vec4(maxp.x, minp.y, maxp.z, 1.0f)) < 0.0) &&
+				(dot(m_planes[i], vec4(minp.x, maxp.y, maxp.z, 1.0f)) < 0.0) &&
+				(dot(m_planes[i], vec4(maxp.x, maxp.y, maxp.z, 1.0f)) < 0.0)) {
+				return false;
 			}
 		}
-		return true; // Triangle is inside the frustum
+
+		int out;
+		out = 0; for (int i = 0; i < 8; i++) out += ((m_points[i].x > maxp.x) ? 1 : 0); if (out == 8) return false;
+		out = 0; for (int i = 0; i < 8; i++) out += ((m_points[i].x < minp.x) ? 1 : 0); if (out == 8) return false;
+		out = 0; for (int i = 0; i < 8; i++) out += ((m_points[i].y > maxp.y) ? 1 : 0); if (out == 8) return false;
+		out = 0; for (int i = 0; i < 8; i++) out += ((m_points[i].y < minp.y) ? 1 : 0); if (out == 8) return false;
+		out = 0; for (int i = 0; i < 8; i++) out += ((m_points[i].z > maxp.z) ? 1 : 0); if (out == 8) return false;
+		out = 0; for (int i = 0; i < 8; i++) out += ((m_points[i].z < minp.z) ? 1 : 0); if (out == 8) return false;
+
+		return true;
 	}
 
-	static array<vec4, 6> frustumPlanes(const mat4x4& viewProjectionMatrix) {
-		array<vec4, 6> planes = {};
-		// Right plane
-		planes[0] = vec4(viewProjectionMatrix[0][3] - viewProjectionMatrix[0][0],
-			viewProjectionMatrix[1][3] - viewProjectionMatrix[1][0],
-			viewProjectionMatrix[2][3] - viewProjectionMatrix[2][0],
-			viewProjectionMatrix[3][3] - viewProjectionMatrix[3][0]);
+	template<Planes i, Planes j>
+	struct ij2k {
+		enum { k = i * (9 - i) / 2 + j - 1 };
+	};
 
-		// Left plane
-		planes[1] = vec4(viewProjectionMatrix[0][3] + viewProjectionMatrix[0][0],
-			viewProjectionMatrix[1][3] + viewProjectionMatrix[1][0],
-			viewProjectionMatrix[2][3] + viewProjectionMatrix[2][0],
-			viewProjectionMatrix[3][3] + viewProjectionMatrix[3][0]);
+	template<Planes a, Planes b, Planes c>
+	vec3 intersection(const vec3* crosses) const {
+		float D = dot(vec3(m_planes[a]), crosses[ij2k<b, c>::k]);
+		vec3 res = mat3(crosses[ij2k<b, c>::k], -crosses[ij2k<a, c>::k], crosses[ij2k<a, b>::k]) *
+			vec3(m_planes[a].w, m_planes[b].w, m_planes[c].w);
+		return res * (-1.0f / D);
+	}
+};
 
-		// Bottom plane
-		planes[2] = vec4(viewProjectionMatrix[0][3] + viewProjectionMatrix[0][1],
-			viewProjectionMatrix[1][3] + viewProjectionMatrix[1][1],
-			viewProjectionMatrix[2][3] + viewProjectionMatrix[2][1],
-			viewProjectionMatrix[3][3] + viewProjectionMatrix[3][1]);
 
-		// Top plane
-		planes[3] = vec4(viewProjectionMatrix[0][3] - viewProjectionMatrix[0][1],
-			viewProjectionMatrix[1][3] - viewProjectionMatrix[1][1],
-			viewProjectionMatrix[2][3] - viewProjectionMatrix[2][1],
-			viewProjectionMatrix[3][3] - viewProjectionMatrix[3][1]);
+struct Camera {
+	vec3 position, rotation;
+	mat4 camera_mat, viewport_mat, projection_mat;
+	Frustum view_frustum;
 
-		// Near plane
-		planes[4] = vec4(viewProjectionMatrix[0][2],
-			viewProjectionMatrix[1][2],
-			viewProjectionMatrix[2][2],
-			viewProjectionMatrix[3][2]);
+	float fov, near_clip, far_clip;
 
-		// Far plane
-		planes[5] = vec4(viewProjectionMatrix[0][3] - viewProjectionMatrix[0][2],
-			viewProjectionMatrix[1][3] - viewProjectionMatrix[1][2],
-			viewProjectionMatrix[2][3] - viewProjectionMatrix[2][2],
-			viewProjectionMatrix[3][3] - viewProjectionMatrix[3][2]);
+	Camera() {
+		position = vec3(0, 0, 0);
+		rotation = vec3(0, 0, 0);
 
-		// Normalize the planes
-		for (int i = 0; i < 6; i++) {
-			planes[i] = normalize(planes[i]);
-		}
+		fov = 50.0;
+		near_clip = 0.1;
+		far_clip = 1000.0;
 
-		return planes;
+		camera_mat = mat4(1);
+		viewport_mat = mat4(1);
+		projection_mat = mat4(1);
+
+		view_frustum = Frustum(camera_mat * projection_mat);
 	}
 
 	void process(const uint16_t resx, const uint16_t resy) {
-		res_x = resx;
-		res_y = resy;
-
-		const mat4x4 translation = mat4x4(
-			1, 0, 0, pos.x,
-			0, 1, 0, pos.y,
-			0, 0, 1, pos.z,
+		const mat4 translation_matrix = mat4(
+			1, 0, 0, position.x,
+			0, 1, 0, position.y,
+			0, 0, 1, position.z,
 			0, 0, 0, 1
 		);
 
-		const float Yaw = rot.x * 0.017453293f;
-		const float Pitch = rot.y * 0.017453293f;
-		const float Roll = rot.z * 0.017453293f;
+		const float Yaw   = rotation.x * DEG_RAD;
+		const float Pitch = rotation.y * DEG_RAD;
+		const float Roll  = rotation.z * DEG_RAD;
 
-		const mat4x4 yawMat = mat4x4(
-			cos(Yaw), 0, sin(Yaw), 0,
-			0, 1, 0, 0,
-			-sin(Yaw), 0, cos(Yaw), 0,
-			0, 0, 0, 1
-		);
+		mat4 rotation_Matrix = mat4(1.0f);
+		rotation_Matrix = rotate(rotation_Matrix, Yaw  , vec3(0.0f, 1.0f, 0.0f));
+		rotation_Matrix = rotate(rotation_Matrix, Pitch, vec3(1.0f, 0.0f, 0.0f));
+		rotation_Matrix = rotate(rotation_Matrix, Roll , vec3(0.0f, 0.0f, 1.0f));
 
-		const mat4x4 pitchMat = mat4x4(
-			1, 0, 0, 0,
-			0, cos(Pitch), -sin(Pitch), 0,
-			0, sin(Pitch), cos(Pitch), 0,
-			0, 0, 0, 1
-		);
+		camera_mat = rotation_Matrix * translation_matrix;
 
-		const mat4x4 rollMat = mat4x4(
-			cos(Roll), -sin(Roll), 0, 0,
-			sin(Roll), cos(Roll), 0, 0,
-			0, 0, 1, 0,
-			0, 0, 0, 1
-		);
+		float aspect_ratio = float(resx) / float(resy);
 
-		camera_mat = translation * (pitchMat * yawMat * rollMat);
-
-		aspect_ratio = float(res_x) / float(res_y);
-
-		const float top = tan((fov * 0.0174532925) / 2.0) * near_clip;
+		const float top = tan((fov * DEG_RAD) / 2.0) * near_clip;
 		const float right = top * aspect_ratio;
 
-		projection_mat = mat4x4(
-			near_clip / right, 0, 0, 0,
-			0, near_clip / top, 0, 0,
-			0, 0, -(far_clip + near_clip) / (far_clip - near_clip), -(2.0f * far_clip * near_clip) / (far_clip - near_clip),
-			0, 0, -1, 0
-		);
+		projection_mat = perspective(fov * DEG_RAD, aspect_ratio, near_clip, far_clip);
 
-		viewport_mat = mat4x4(
-			float(res_x) / 2.0f, 0, 0, float(res_x) / 2.0f,
-			0, float(res_y) / 2.0f, 0, float(res_y) / 2.0f,
+		viewport_mat = mat4(
+			float(resx) / 2.0f, 0, 0, float(resx) / 2.0f,
+			0, float(resy) / 2.0f, 0, float(resy) / 2.0f,
 			0, 0, 0.5f, 0.5f,
 			0, 0, 0, 1
 		);
 
-		frustum = frustumPlanes(viewport_mat);
+		view_frustum = Frustum(projection_mat * camera_mat);
 	}
 
-	void move(const float& x, const float& y, const float& z, const float & sensitivity) {
-		vec3 forward(0.0f, 0.0f, -1.0f);
-		vec3 up(0.0f, 1.0f, 0.0f);
-		vec3 right(1.0f, 0.0f, 0.0f);
+	void move_camera(const float& x, const float& y, const float& z, const float & sensitivity) {
+		mat4 rotation_Matrix = mat4(1.0f);
+		rotation_Matrix = rotate(rotation_Matrix, x * DEG_RAD, vec3(0.0f, 1.0f, 0.0f));
+		rotation_Matrix = rotate(rotation_Matrix, y * DEG_RAD, vec3(1.0f, 0.0f, 0.0f));
+		rotation_Matrix = rotate(rotation_Matrix, z * DEG_RAD, vec3(0.0f, 0.0f, 1.0f));
 
-		forward = rotateX(forward, rot.x * DEG_RAD);
-		forward = rotateY(forward, rot.y * DEG_RAD);
-		forward = rotateZ(forward, rot.z * DEG_RAD);
-		forward = (forward);
+		vec3 forward = vec3(rotation_Matrix * vec4(0.0f, 0.0f, -1.0f, 0.0f));
+		vec3 up      = vec3(rotation_Matrix * vec4(0.0f, 1.0f,  0.0f, 0.0f));
+		vec3 right   = vec3(rotation_Matrix * vec4(1.0f, 0.0f,  0.0f, 0.0f));
 
-		up = rotateX(up, rot.x * DEG_RAD);
-		up = rotateY(up, rot.y * DEG_RAD);
-		up = rotateZ(up, rot.z * DEG_RAD);
-		up = normalize(up);
-
-		right = rotateX(right, rot.x * DEG_RAD);
-		right = rotateY(right, rot.y * DEG_RAD);
-		right = rotateZ(right, rot.z * DEG_RAD);
-		right = normalize(right);
-
-		pos += right * x * sensitivity + up * y * sensitivity + forward * z * sensitivity;
+		position += right * x * sensitivity + up * y * sensitivity + forward * z * sensitivity;
 	}
 
-	void rotate(const float& x, const float& y, const float& z) {
-
+	void rotate_camera(const float& x, const float& y, const float& z, const float& sensitivity) {
+		if (rotation.y + y > 89.0f)  rotation += vec3(x,  89.0f, x) * sensitivity;
+		if (rotation.y + y < -89.0f) rotation += vec3(x, -89.0f, x) * sensitivity;
+		rotation += vec3(x, y, x) * sensitivity;
 	}
 };

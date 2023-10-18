@@ -16,9 +16,9 @@ struct Scene {
 	vector<vector<float>> Zbuffer;
 
 	vec3 getCamera() {
-		float yaw =   cam.rot.x * DEG_RAD;
-		float pitch = cam.rot.y * DEG_RAD;
-		float roll =  cam.rot.z * DEG_RAD;
+		float yaw =   cam.rotation.x * DEG_RAD;
+		float pitch = cam.rotation.y * DEG_RAD;
+		float roll =  cam.rotation.z * DEG_RAD;
 
 		mat4 rotationMatrix(1.0f);
 		rotationMatrix = rotate(rotationMatrix, yaw,   vec3(0.0f, 1.0f, 0.0f));

@@ -60,7 +60,7 @@ struct Vertex {
 };
 
 struct Mesh {
-	vec3 rot, pos, scale;
+	vec3 rotation, position, scale;
 
 	vector<vec3> vertex_positions;
 	vector<vec3> vertex_colors;
@@ -71,8 +71,8 @@ struct Mesh {
 	vector<Vertex> output;
 
 	Mesh() {
-		rot = vec3(0.0f);
-		pos = vec3(0.0f);
+		rotation = vec3(0.0f);
+		position = vec3(0.0f);
 		scale = vec3(1.0f);
 
 		vertex_positions = vector<glm::vec3>();
@@ -83,51 +83,35 @@ struct Mesh {
 		output = vector<Vertex>();
 	}
 
-	mat4x4 process() const {
-		const mat4x4 translation = mat4x4(
-			1, 0, 0, pos.x,
-			0, 1, 0, pos.y,
-			0, 0, 1, pos.z,
+	mat4 process() const {
+		const mat4 translation_matrix = mat4(
+			1, 0, 0, position.x,
+			0, 1, 0, position.y,
+			0, 0, 1, position.z,
 			0, 0, 0, 1
 		);
 
-		const double Yaw = rot.x * 0.0174532925;
-		const double Pitch = rot.y * 0.0174532925;
-		const double Roll = rot.z * 0.0174532925;
+		const float Yaw   = rotation.x * DEG_RAD;
+		const float Pitch = rotation.y * DEG_RAD;
+		const float Roll  = rotation.z * DEG_RAD;
 
-		const mat4x4 yawMat = mat4x4(
-			cos(Yaw), 0, sin(Yaw), 0,
-			0, 1, 0, 0,
-			-sin(Yaw), 0, cos(Yaw), 0,
-			0, 0, 0, 1
-		);
+		mat4 rotation_Matrix = mat4(1.0f);  // Start with an identity matrix
+		rotation_Matrix = glm::rotate(rotation_Matrix, Yaw, vec3(0.0f, 1.0f, 0.0f));
+		rotation_Matrix = glm::rotate(rotation_Matrix, Pitch, vec3(1.0f, 0.0f, 0.0f));
+		rotation_Matrix = glm::rotate(rotation_Matrix, Roll, vec3(0.0f, 0.0f, 1.0f));
 
-		const mat4x4 pitchMat = mat4x4(
-			1, 0, 0, 0,
-			0, cos(Pitch), -sin(Pitch), 0,
-			0, sin(Pitch), cos(Pitch), 0,
-			0, 0, 0, 1
-		);
-
-		const mat4x4 rollMat = mat4x4(
-			cos(Roll), -sin(Roll), 0, 0,
-			sin(Roll), cos(Roll), 0, 0,
-			0, 0, 1, 0,
-			0, 0, 0, 1
-		);
-
-		const mat4x4 scaleMat = mat4x4(
+		const mat4 scale_matrix = mat4(
 			scale.x, 0, 0, 0,
 			0, scale.y, 0, 0,
 			0, 0, scale.z, 0,
 			0, 0, 0, 1
 		);
 
-		return (pitchMat * yawMat * rollMat) * scaleMat * translation;
+		return rotation_Matrix * scale_matrix * translation_matrix;
 	}
 
-	void processVertices(const mat4x4& cam_mat, const mat4x4& proj_mat, const mat4x4& view_mat, const mat4x4& model_mat) {
-		mat4x4 inverse = glm::inverse(cam_mat);
+	void processVertices(const mat4& cam_mat, const mat4& proj_mat, const mat4& view_mat, const mat4& model_mat) {
+		mat4 inverse = glm::inverse(cam_mat);
 		for (int i = 0; i < 4; ++i) {
 			for (int j = 0; j < 4; ++j) {
 				if (inverse[i][j] == -0.0f) {
@@ -136,7 +120,7 @@ struct Mesh {
 			}
 		}
 
-		const mat4x4 View_Matrix = mulmat4(mulmat4(mulmat4(view_mat, proj_mat), inverse), model_mat);
+		const mat4 View_Matrix = mulmat4(mulmat4(mulmat4(view_mat, proj_mat), inverse), model_mat);
 
 		output = vector<Vertex>(vertex_positions.size(), Vertex());
 
