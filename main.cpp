@@ -151,6 +151,7 @@ int main(int argc, char* argv[]) {
 				if (event.key.keysym.sym == SDLK_SPACE) {
 					track_mode = !track_mode;
 					if (track_mode) {
+						++scene_loop;
 						scene.camera.rotation = vec3(90, 0, 0);
 						last_camera_offset = scene.camera.position;
 						last_camera_rotation = scene.camera.rotation;
