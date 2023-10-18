@@ -45,7 +45,7 @@ mat4 Mesh::process() const {
 }
 
 void Mesh::processVertices(const Scene& scene) {
-	mat4 inv = inverse(scene.cam.camera_mat);
+	mat4 inv = inverse(scene.camera.camera_mat);
 	for (int i = 0; i < 4; ++i) {
 		for (int j = 0; j < 4; ++j) {
 			if (inv[i][j] == -0.0f) {
@@ -55,7 +55,7 @@ void Mesh::processVertices(const Scene& scene) {
 	}
 
 	const mat4 model_mat = process();
-	const mat4 View_Matrix = mulmat4(mulmat4(mulmat4(scene.cam.viewport_mat, scene.cam.projection_mat), inv), model_mat);
+	const mat4 View_Matrix = mulmat4(mulmat4(mulmat4(scene.camera.viewport_mat, scene.camera.projection_mat), inv), model_mat);
 
 	output_faces = vector<Triangle>();
 	output_vertices = map<size_t, Vertex>();

@@ -58,7 +58,7 @@ void renderMesh(SDL_Renderer* renderer, Scene& scene, const Mesh& mesh, const ve
 
 						vec3 Sun = normalize(-(u * v1.pos + v * v2.pos + w * v3.pos));
 
-						float Sun_Intensity = dot(Normal, Sun) * 2.0f;
+						float Sun_Intensity = pow(dot(Normal, Sun), 2);
 						Sun_Intensity = glm::clamp(Sun_Intensity, 0.0f, 1.0f);
 						Color *= Sun_Intensity;
 						Color += vec3(0.05f); // Ambient Light

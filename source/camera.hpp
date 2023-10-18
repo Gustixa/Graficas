@@ -19,7 +19,6 @@ struct Camera {
 		camera_mat = mat4(1);
 		viewport_mat = mat4(1);
 		projection_mat = mat4(1);
-
 	}
 
 	void process(const uint16_t resx, const uint16_t resy) {

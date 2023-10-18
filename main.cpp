@@ -7,7 +7,10 @@
 
 SDL_Window* window = nullptr;
 SDL_Renderer* renderer = nullptr;
-array<bool, 12> input = array<bool, 12>();
+array<bool, 8> input = array<bool, 8>();
+map<string, Mesh>::iterator scene_loop;
+vec3 last_camera = vec3(0, 0, 0);
+bool track_mode = false;
 bool pause = false;
 
 // Variables
@@ -31,9 +34,10 @@ int main(int argc, char* argv[]) {
 	bool running = true;
 
 	Scene scene = Scene(RESX, RESY);
+	scene_loop = scene.objects.begin();
 
-	scene.cam.position = vec3(0, 4500, 0);
-	scene.cam.rotation = vec3(90, 0, 0);
+	scene.camera.position = vec3(0, 4500, 0);
+	scene.camera.rotation = vec3(90, 0, 0);
 
 	// Load .obj
 	scene.objects["Sun"         ] = Mesh::readObj("./resources/planet.obj");
@@ -99,13 +103,25 @@ int main(int argc, char* argv[]) {
 				if (event.key.keysym.sym == SDLK_p) {
 					pause = !pause;
 				}
+				if (track_mode) {
+					if (event.key.keysym.sym == SDLK_RIGHT) {
+						++scene_loop;
+						if (scene_loop == scene.objects.end()) scene_loop = scene.objects.begin();
+					}
+					else if (event.key.keysym.sym == SDLK_LEFT) {
+						if (scene_loop == scene.objects.begin()) scene_loop = scene.objects.end();
+						--scene_loop;
+					}
+				}
+				if (event.key.keysym.sym == SDLK_UP || event.key.keysym.sym == SDLK_DOWN) {
+					track_mode = !track_mode;
+					if (track_mode) last_camera = scene.camera.position;
+					else scene.camera.position = last_camera;
+				}
 			}
 			else if (event.type == SDL_MOUSEWHEEL) {
-				if (event.wheel.preciseY > 0)
-					moveSensitivity *= 1.1;
-				if (event.wheel.preciseY < 0) {
-					moveSensitivity /= 1.1;
-				}
+				if (event.wheel.preciseY > 0) moveSensitivity *= 1.1;
+				if (event.wheel.preciseY < 0) moveSensitivity /= 1.1;
 			}
 		}
 		render(scene);
@@ -141,46 +157,42 @@ void render(Scene& scene) {
 	scene.Zbuffer = vector<vector<float>>(scene.RESX, vector<float>(scene.RESY, 10000.0f));
 
 	// User Input Update
-	if (input[KEY_W]) scene.cam.move_camera( 0.0, -0.1,  0.0, moveSensitivity * delta_time);
-	if (input[KEY_S]) scene.cam.move_camera( 0.0,  0.1,  0.0, moveSensitivity * delta_time);
-	if (input[KEY_D]) scene.cam.move_camera( 0.1,  0.0,  0.0, moveSensitivity * delta_time);
-	if (input[KEY_A]) scene.cam.move_camera(-0.1,  0.0,  0.0, moveSensitivity * delta_time);
-	if (input[KEY_E]) scene.cam.move_camera( 0.0,  0.0,  1.0, moveSensitivity * delta_time);
-	if (input[KEY_Q]) scene.cam.move_camera( 0.0,  0.0, -1.0, moveSensitivity * delta_time);
+	if (input[KEY_W]) scene.camera.move_camera(0.0, -0.1, 0.0, moveSensitivity * delta_time);
+	if (input[KEY_S]) scene.camera.move_camera(0.0, 0.1, 0.0, moveSensitivity * delta_time);
+	if (input[KEY_D]) scene.camera.move_camera(0.1, 0.0, 0.0, moveSensitivity * delta_time);
+	if (input[KEY_A]) scene.camera.move_camera(-0.1, 0.0, 0.0, moveSensitivity * delta_time);
+	if (input[KEY_E]) scene.camera.move_camera(0.0, 0.0, 1.0, moveSensitivity * delta_time);
+	if (input[KEY_Q]) scene.camera.move_camera(0.0, 0.0, -1.0, moveSensitivity * delta_time);
 	if (input[KEY_R]) {
-		scene.cam.position = vec3(0, 4500, 0);
-		scene.objects["Sun"         ].position = vec3(0);
-		scene.objects["Mercury"     ].position = vec3(39.00, 0, 0);
-		scene.objects["Venus"       ].position = vec3(72.00, 0, 0);
-		scene.objects["Earth"       ].position = vec3(100.0, 0, 0);
-		scene.objects["Moon"        ].position = vec3(110.0, 0, 0);
-		scene.objects["Mars"        ].position = vec3(152.0, 0, 0);
-		scene.objects["Jupiter"     ].position = vec3(520.0, 0, 0);
-		scene.objects["Saturn"      ].position = vec3(954.0, 0, 0);
+		scene.camera.position = vec3(0, 4500, 0);
+		scene.objects["Sun"].position = vec3(0);
+		scene.objects["Mercury"].position = vec3(39.00, 0, 0);
+		scene.objects["Venus"].position = vec3(72.00, 0, 0);
+		scene.objects["Earth"].position = vec3(100.0, 0, 0);
+		scene.objects["Moon"].position = vec3(110.0, 0, 0);
+		scene.objects["Mars"].position = vec3(152.0, 0, 0);
+		scene.objects["Jupiter"].position = vec3(520.0, 0, 0);
+		scene.objects["Saturn"].position = vec3(954.0, 0, 0);
 		scene.objects["Saturn Rings"].position = vec3(954.0, 0, 0);
-		scene.objects["Uranus :)"   ].position = vec3(1920., 0, 0);
-		scene.objects["Neptune"     ].position = vec3(3006., 0, 0);
-		scene.objects["Pluto :("    ].position = vec3(3900., 0, 0);
-		scene.objects["Sun"         ].rotation = vec3(0);
-		scene.objects["Mercury"     ].rotation = vec3(0);
-		scene.objects["Venus"       ].rotation = vec3(0);
-		scene.objects["Earth"       ].rotation = vec3(0);
-		scene.objects["Moon"        ].rotation = vec3(0);
-		scene.objects["Mars"        ].rotation = vec3(0);
-		scene.objects["Jupiter"     ].rotation = vec3(0);
-		scene.objects["Saturn"      ].rotation = vec3(0);
+		scene.objects["Uranus :)"].position = vec3(1920., 0, 0);
+		scene.objects["Neptune"].position = vec3(3006., 0, 0);
+		scene.objects["Pluto :("].position = vec3(3900., 0, 0);
+		scene.objects["Sun"].rotation = vec3(0);
+		scene.objects["Mercury"].rotation = vec3(0);
+		scene.objects["Venus"].rotation = vec3(0);
+		scene.objects["Earth"].rotation = vec3(0);
+		scene.objects["Moon"].rotation = vec3(0);
+		scene.objects["Mars"].rotation = vec3(0);
+		scene.objects["Jupiter"].rotation = vec3(0);
+		scene.objects["Saturn"].rotation = vec3(0);
 		scene.objects["Saturn Rings"].rotation = vec3(0);
-		scene.objects["Uranus :)"   ].rotation = vec3(0);
-		scene.objects["Neptune"     ].rotation = vec3(0);
-		scene.objects["Pluto :("    ].rotation = vec3(0);
+		scene.objects["Uranus :)"].rotation = vec3(0);
+		scene.objects["Neptune"].rotation = vec3(0);
+		scene.objects["Pluto :("].rotation = vec3(0);
 	}
-	//if (input[KEY_DOWN])  scene.cam.rotate_camera(  0.0,  1.0, 0.0, lookSensitivity * delta_time);
-	//if (input[KEY_UP])    scene.cam.rotate_camera(  0.0, -1.0, 0.0, lookSensitivity * delta_time);
-	//if (input[KEY_RIGHT]) scene.cam.rotate_camera(  1.0,  0.0, 0.0, lookSensitivity * delta_time);
-	//if (input[KEY_LEFT])  scene.cam.rotate_camera( -1.0,  0.0, 0.0, lookSensitivity * delta_time);
 
 	// Scene Tick Update ----------------------------------------------------------------------------------------------------------
-	scene.cam.process(scene.RESX, scene.RESY);
+	scene.camera.process(scene.RESX, scene.RESY);
 		// Planets
 	if (!pause) {
 		rotateAroundAnchor(scene.objects["Mercury"     ].position, scene.objects["Sun"].position, vec3(0, 1.0 / 0.8797 * delta_time, 0));
@@ -210,6 +222,11 @@ void render(Scene& scene) {
 		// Moons
 		rotateAroundAnchor(scene.objects["Moon"].position, scene.objects["Earth"].position, vec3(0, -2.0 * delta_time, 0));
 		scene.objects["Moon"].rotation += vec3(-40.0 * delta_time, 0, 0);
+
+		if (track_mode) {
+			scene.camera.position.x = scene_loop->second.position.x;
+			scene.camera.position.z = scene_loop->second.position.z;
+		}
 	}
 
 	// Vertex Shader
