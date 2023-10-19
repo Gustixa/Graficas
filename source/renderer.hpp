@@ -8,7 +8,7 @@
 #include "scene.hpp"
 
 enum Shader {
-	GOURAD,
+	PLANET,
 	SUN,
 	CLOUDS,
 	SHIP

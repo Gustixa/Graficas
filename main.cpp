@@ -341,18 +341,18 @@ void render(Scene& scene, const string& focus) {
 	//renderMesh(renderer, scene, scene.objects["Env"         ], vec3(1.0, 1.0, 1.0), Shader::SUN   , scene.textures["Env"]);
 	renderMesh(renderer, scene, scene.objects["Ship"        ], vec3(1.0, 1.0, 1.0), Shader::SHIP  , scene.textures["Sun"]);
 	renderMesh(renderer, scene, scene.objects["Sun"         ], vec3(1.0, 1.0, 1.0), Shader::SUN   , scene.textures["Sun"         ]);
-	renderMesh(renderer, scene, scene.objects["Mercury"     ], vec3(1.0, 1.0, 1.0), Shader::SUN   , scene.textures["Mercury"     ]);
-	renderMesh(renderer, scene, scene.objects["Venus"       ], vec3(1.0, 1.0, 1.0), Shader::SUN   , scene.textures["Venus"       ]);
-	renderMesh(renderer, scene, scene.objects["Earth"       ], vec3(1.0, 1.0, 1.0), Shader::SUN   , scene.textures["Earth"       ]);
+	renderMesh(renderer, scene, scene.objects["Mercury"     ], vec3(1.0, 1.0, 1.0), Shader::PLANET, scene.textures["Mercury"     ]);
+	renderMesh(renderer, scene, scene.objects["Venus"       ], vec3(1.0, 1.0, 1.0), Shader::PLANET, scene.textures["Venus"       ]);
+	renderMesh(renderer, scene, scene.objects["Earth"       ], vec3(1.0, 1.0, 1.0), Shader::PLANET, scene.textures["Earth"       ]);
 	renderMesh(renderer, scene, scene.objects["Earth Clouds"], vec3(1.0, 1.0, 1.0), Shader::CLOUDS, scene.textures["Earth Clouds"]);
-	renderMesh(renderer, scene, scene.objects["Moon"        ], vec3(1.0, 1.0, 1.0), Shader::SUN   , scene.textures["Moon"        ]);
-	renderMesh(renderer, scene, scene.objects["Mars"        ], vec3(1.0, 1.0, 1.0), Shader::SUN   , scene.textures["Mars"        ]);
-	renderMesh(renderer, scene, scene.objects["Jupiter"     ], vec3(1.0, 1.0, 1.0), Shader::SUN   , scene.textures["Jupiter"     ]);
-	renderMesh(renderer, scene, scene.objects["Saturn"      ], vec3(1.0, 1.0, 1.0), Shader::SUN   , scene.textures["Saturn"      ]);
-	renderMesh(renderer, scene, scene.objects["Saturn Rings"], vec3(1.0, 1.0, 1.0), Shader::SUN   , scene.textures["Saturn Rings"]);
-	renderMesh(renderer, scene, scene.objects["Uranus"      ], vec3(1.0, 1.0, 1.0), Shader::SUN   , scene.textures["Uranus"      ]);
-	renderMesh(renderer, scene, scene.objects["Neptune"     ], vec3(1.0, 1.0, 1.0), Shader::SUN   , scene.textures["Neptune"     ]);
-	renderMesh(renderer, scene, scene.objects["Pluto"       ], vec3(1.0, 1.0, 1.0), Shader::SUN   , scene.textures["Mercury"     ]);
+	renderMesh(renderer, scene, scene.objects["Moon"        ], vec3(1.0, 1.0, 1.0), Shader::PLANET, scene.textures["Moon"        ]);
+	renderMesh(renderer, scene, scene.objects["Mars"        ], vec3(1.0, 1.0, 1.0), Shader::PLANET, scene.textures["Mars"        ]);
+	renderMesh(renderer, scene, scene.objects["Jupiter"     ], vec3(1.0, 1.0, 1.0), Shader::PLANET, scene.textures["Jupiter"     ]);
+	renderMesh(renderer, scene, scene.objects["Saturn"      ], vec3(1.0, 1.0, 1.0), Shader::PLANET, scene.textures["Saturn"      ]);
+	renderMesh(renderer, scene, scene.objects["Saturn Rings"], vec3(1.0, 1.0, 1.0), Shader::PLANET, scene.textures["Saturn Rings"]);
+	renderMesh(renderer, scene, scene.objects["Uranus"      ], vec3(1.0, 1.0, 1.0), Shader::PLANET, scene.textures["Uranus"      ]);
+	renderMesh(renderer, scene, scene.objects["Neptune"     ], vec3(1.0, 1.0, 1.0), Shader::PLANET, scene.textures["Neptune"     ]);
+	renderMesh(renderer, scene, scene.objects["Pluto"       ], vec3(1.0, 1.0, 1.0), Shader::PLANET, scene.textures["Mercury"     ]);
 
 	SDL_RenderPresent(renderer);
 }

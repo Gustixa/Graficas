@@ -64,7 +64,7 @@ void renderMesh(SDL_Renderer* renderer, Scene& scene, const Mesh& mesh, const ve
 									);
 									renderPoint(renderer, scene.RESX, scene.RESY, vec2(x, y), texture.getColor(uv));
 								}
-							case GOURAD:
+							case PLANET:
 								if (Depth < scene.Zbuffer[x][y]) {
 									scene.Zbuffer[x][y] = Depth;
 
@@ -84,13 +84,12 @@ void renderMesh(SDL_Renderer* renderer, Scene& scene, const Mesh& mesh, const ve
 								}
 							case CLOUDS:
 								if (Depth < scene.Zbuffer[x][y]) {
-
 									const vec2 uv = vec2(
 										u * v1.texcoord.x + v * v2.texcoord.x + w * v3.texcoord.x,
 										u * v1.texcoord.y + v * v2.texcoord.y + w * v3.texcoord.y
 									);
 									vec3 Color = texture.getColor(uv);
-									if (Color.x > 0.005f && Color.x > 0.005f && Color.x > 0.005f) {
+									if (Color.x > 0.05f && Color.y > 0.05f && Color.z > 0.05f) {
 										scene.Zbuffer[x][y] = Depth;
 										vec3 Normal = normalize(u * v1.normal + v * v2.normal + w * v3.normal);
 										vec3 Sun = normalize(-(u * v1.pos + v * v2.pos + w * v3.pos));
