@@ -199,7 +199,7 @@ int main(int argc, char* argv[]) {
 
 void init(const uint16_t RESX, const uint16_t RESY) {
 	SDL_Init(SDL_INIT_VIDEO);
-	window = SDL_CreateWindow("Software Renderer", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, RESX, RESY, SDL_WINDOW_SHOWN);
+	window = SDL_CreateWindow("Samuel | 0.0 FPS | Camera sensitivity : 1000.0 | Simulation Speed : 0.2 | - ", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, RESX, RESY, SDL_WINDOW_SHOWN);
 	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
 }
 
@@ -314,17 +314,23 @@ void render(Scene& scene, const string& focus) {
 			scene.camera.process(scene.RESX, scene.RESY);
 	}
 
-	mat4 rotation_Matrix = mat4(1.0f);
-	rotation_Matrix = rotate(rotation_Matrix, (scene.camera.rotation.y) * DEG_RAD, vec3(0.0f, 1.0f, 0.0f));
-	rotation_Matrix = rotate(rotation_Matrix, (scene.camera.rotation.x) * DEG_RAD, vec3(1.0f, 0.0f, 0.0f));
-	rotation_Matrix = rotate(rotation_Matrix, (scene.camera.rotation.z) * DEG_RAD, vec3(0.0f, 0.0f, 1.0f));
+	if (track_mode) {
+		mat4 rotation_Matrix = mat4(1.0f);
+		rotation_Matrix = rotate(rotation_Matrix, (scene.camera.rotation.y) * DEG_RAD, vec3(0.0f, 1.0f, 0.0f));
+		rotation_Matrix = rotate(rotation_Matrix, (scene.camera.rotation.x) * DEG_RAD, vec3(1.0f, 0.0f, 0.0f));
+		rotation_Matrix = rotate(rotation_Matrix, (scene.camera.rotation.z) * DEG_RAD, vec3(0.0f, 0.0f, 1.0f));
 
-	vec3 z_vec = vec3(rotation_Matrix * vec4(0.0f, 0.0f, -1.0f, 0.0f));
-	vec3 y_vec = vec3(rotation_Matrix * vec4(0.0f, 1.0f,  0.0f, 0.0f));
-	vec3 x_vec = vec3(rotation_Matrix * vec4(1.0f, 0.0f,  0.0f, 0.0f));
-	scene.objects["Ship"].rotation = scene.camera.rotation + vec3(0,180,0);
-	scene.objects["Ship"].position = scene.camera.position + z_vec * 15.0f - y_vec * 2.0f - x_vec * 2.0f;
+		vec3 z_vec = vec3(rotation_Matrix * vec4(0.0f, 0.0f, -1.0f, 0.0f));
+		vec3 y_vec = vec3(rotation_Matrix * vec4(0.0f, 1.0f, 0.0f, 0.0f));
+		vec3 x_vec = vec3(rotation_Matrix * vec4(1.0f, 0.0f, 0.0f, 0.0f));
+		scene.objects["Ship"].rotation = scene.camera.rotation + vec3(0, 180, 0);
+		scene.objects["Ship"].position = scene.camera.position + z_vec * 15.0f - y_vec * 2.0f - x_vec * 2.0f;
+	}
+	else {
+		scene.objects["Ship"].rotation = scene.camera.rotation + vec3(270, 270, 0);
+		scene.objects["Ship"].position = scene.camera.position + vec3(-2.0f, -15.0f, 2.0f);
 
+	}
 
 	// Vertex Shader
 	for (pair<const string, Mesh>& mesh : scene.objects) {
