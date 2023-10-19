@@ -101,6 +101,18 @@ void renderMesh(SDL_Renderer* renderer, Scene& scene, const Mesh& mesh, const ve
 										renderPoint(renderer, scene.RESX, scene.RESY, vec2(x, y), Color);
 									}
 								}
+							case SHIP:
+								if (Depth < scene.Zbuffer[x][y]) {
+									vec3 Color = vec3(1.0);
+									scene.Zbuffer[x][y] = Depth;
+									vec3 Normal = normalize(u * v1.normal + v * v2.normal + w * v3.normal);
+									vec3 Sun = normalize(-(u * v1.pos + v * v2.pos + w * v3.pos));
+									float Sun_Intensity = pow(dot(Normal, Sun), 2);
+									Sun_Intensity = glm::clamp(Sun_Intensity, 0.0f, 1.0f);
+									Color *= Sun_Intensity;
+									Color = clamp(Color, 0.0f, 1.0f);
+									renderPoint(renderer, scene.RESX, scene.RESY, vec2(x, y), Color);
+								}
 						}
 					}
 				}

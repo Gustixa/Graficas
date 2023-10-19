@@ -10,7 +10,8 @@
 enum Shader {
 	GOURAD,
 	SUN,
-	CLOUDS
+	CLOUDS,
+	SHIP
 };
 
 void renderPoint(SDL_Renderer* renderer, const uint16_t resx, const uint16_t resy, const ivec2& point, const vec3& color);

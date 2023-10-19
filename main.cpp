@@ -16,7 +16,7 @@ bool pause = false;
 
 // Variables
 float moveSensitivity = 1000.0;
-float simulationSpeed = 1.0;
+float simulationSpeed = 0.2;
 const uint16_t RESX = 1200;
 const uint16_t RESY = 800;
 
@@ -41,6 +41,8 @@ int main(int argc, char* argv[]) {
 	scene.camera.rotation = vec3(90, 0, 0);
 
 	// Load .obj
+	scene.objects["Env"         ] = Mesh::readObj("./resources/environment.obj");
+	scene.objects["Ship"        ] = Mesh::readObj("./resources/ship.obj"  );
 	scene.objects["Sun"         ] = Mesh::readObj("./resources/planet.obj");
 	scene.objects["Mercury"     ] = Mesh::readObj("./resources/planet.obj");
 	scene.objects["Venus"       ] = Mesh::readObj("./resources/planet.obj");
@@ -56,6 +58,7 @@ int main(int argc, char* argv[]) {
 	scene.objects["Pluto"       ] = Mesh::readObj("./resources/moon.obj"  );
 
 	// Load.png
+	scene.textures["Env"         ] = Texture("./resources/Env_Map.jpg");
 	scene.textures["Sun"         ] = Texture("./resources/Sun.png"    );
 	scene.textures["Mercury"     ] = Texture("./resources/Mercury.png");
 	scene.textures["Venus"       ] = Texture("./resources/Venus.png"  );
@@ -87,6 +90,8 @@ int main(int argc, char* argv[]) {
 	scene.objects["Pluto"       ].position = vec3(3900., 0, 0);
 
 	// Scale
+	scene.objects["Env"         ].scale = vec3(2500.0);
+	scene.objects["Ship"        ].scale = vec3(0.2000);
 	scene.objects["Sun"         ].scale = vec3(13.910);
 	scene.objects["Mercury"     ].scale = vec3(0.2240);
 	scene.objects["Venus"       ].scale = vec3(0.6052);
@@ -309,12 +314,26 @@ void render(Scene& scene, const string& focus) {
 			scene.camera.process(scene.RESX, scene.RESY);
 	}
 
+	mat4 rotation_Matrix = mat4(1.0f);
+	rotation_Matrix = rotate(rotation_Matrix, (scene.camera.rotation.y) * DEG_RAD, vec3(0.0f, 1.0f, 0.0f));
+	rotation_Matrix = rotate(rotation_Matrix, (scene.camera.rotation.x) * DEG_RAD, vec3(1.0f, 0.0f, 0.0f));
+	rotation_Matrix = rotate(rotation_Matrix, (scene.camera.rotation.z) * DEG_RAD, vec3(0.0f, 0.0f, 1.0f));
+
+	vec3 z_vec = vec3(rotation_Matrix * vec4(0.0f, 0.0f, -1.0f, 0.0f));
+	vec3 y_vec = vec3(rotation_Matrix * vec4(0.0f, 1.0f,  0.0f, 0.0f));
+	vec3 x_vec = vec3(rotation_Matrix * vec4(1.0f, 0.0f,  0.0f, 0.0f));
+	scene.objects["Ship"].rotation = scene.camera.rotation + vec3(0,180,0);
+	scene.objects["Ship"].position = scene.camera.position + z_vec * 15.0f - y_vec * 2.0f - x_vec * 2.0f;
+
+
 	// Vertex Shader
 	for (pair<const string, Mesh>& mesh : scene.objects) {
 		mesh.second.processVertices(scene);
 	}
 
 	// Render
+	//renderMesh(renderer, scene, scene.objects["Env"         ], vec3(1.0, 1.0, 1.0), Shader::SUN   , scene.textures["Env"]);
+	renderMesh(renderer, scene, scene.objects["Ship"        ], vec3(1.0, 1.0, 1.0), Shader::SHIP  , scene.textures["Sun"]);
 	renderMesh(renderer, scene, scene.objects["Sun"         ], vec3(1.0, 1.0, 1.0), Shader::SUN   , scene.textures["Sun"         ]);
 	renderMesh(renderer, scene, scene.objects["Mercury"     ], vec3(1.0, 1.0, 1.0), Shader::SUN   , scene.textures["Mercury"     ]);
 	renderMesh(renderer, scene, scene.objects["Venus"       ], vec3(1.0, 1.0, 1.0), Shader::SUN   , scene.textures["Venus"       ]);
