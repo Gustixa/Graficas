@@ -333,6 +333,7 @@ void render(Scene& scene, const string& focus) {
 	}
 
 	// Vertex Shader
+	# pragma omp parallel
 	for (pair<const string, Mesh>& mesh : scene.objects) {
 		mesh.second.processVertices(scene);
 	}

@@ -20,6 +20,7 @@
 #include <vector>
 #include <math.h>
 #include <string>
+#include <omp.h>
 #include <ctime>
 #include <array>
 #include <map>
